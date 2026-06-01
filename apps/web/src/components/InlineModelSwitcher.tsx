@@ -642,6 +642,8 @@ export function InlineModelSwitcher({
                     data-testid="inline-model-switcher-agent-model"
                     searchInputTestId="inline-model-switcher-agent-model-search"
                     popoverTestId="inline-model-switcher-agent-model-popover"
+                    minSearchableOptions={5}
+                    popoverMinWidth={340}
                     searchPlaceholder={t('designs.searchPlaceholder')}
                     aria-label={t('inlineSwitcher.modelLabel')}
                     models={currentAgent.models}

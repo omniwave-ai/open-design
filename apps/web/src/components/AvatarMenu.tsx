@@ -272,7 +272,8 @@ export function AvatarMenu({
                         searchPlaceholder={t('newproj.modelSearch')}
                         searchInputTestId="avatar-model-search"
                         popoverTestId="avatar-model-popover"
-                        popoverMinWidth={280}
+                        minSearchableOptions={5}
+                        popoverMinWidth={340}
                       />
                     </label>
                   ) : null}
@@ -342,7 +343,8 @@ export function AvatarMenu({
                   searchPlaceholder={t('newproj.modelSearch')}
                   searchInputTestId="avatar-byok-model-search"
                   popoverTestId="avatar-byok-model-popover"
-                  popoverMinWidth={280}
+                  minSearchableOptions={5}
+                  popoverMinWidth={340}
                 />
               </label>
             </div>

@@ -104,6 +104,51 @@ describe('AvatarMenu', () => {
     expect(onApiModelChange).toHaveBeenCalledWith('gpt-image-2');
   });
 
+
+  it('still shows search for shorter Local CLI catalogs such as Claude fallback models', async () => {
+    const claudeAgents: AgentInfo[] = [
+      {
+        id: 'claude',
+        name: 'Claude Code',
+        bin: 'claude',
+        available: true,
+        version: '1.0.0',
+        models: [
+          { id: 'default', label: 'Default (CLI config)' },
+          { id: 'sonnet', label: 'Sonnet (alias)' },
+          { id: 'opus', label: 'Opus (alias)' },
+          { id: 'haiku', label: 'Haiku (alias)' },
+          { id: 'claude-opus-4-5', label: 'claude-opus-4-5' },
+          { id: 'claude-sonnet-4-5', label: 'claude-sonnet-4-5' },
+          { id: 'claude-haiku-4-5', label: 'claude-haiku-4-5' },
+        ],
+      },
+    ];
+
+    render(
+      <I18nProvider>
+        <AvatarMenu
+          config={{ ...daemonConfig, agentId: 'claude', agentModels: { claude: { model: 'claude-sonnet-4-5' } } }}
+          agents={claudeAgents}
+          daemonLive
+          onModeChange={vi.fn()}
+          onAgentChange={vi.fn()}
+          onAgentModelChange={vi.fn()}
+          onApiModelChange={vi.fn()}
+          onOpenSettings={vi.fn()}
+          providerModelsCache={{}}
+          onRefreshAgents={vi.fn()}
+        />
+      </I18nProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Account & settings' }));
+    const modelCombobox = await screen.findByRole('combobox', { name: 'Model' });
+    fireEvent.click(modelCombobox);
+    const popover = await screen.findByTestId('avatar-model-popover');
+    expect(within(popover).getByTestId('avatar-model-search')).toBeTruthy();
+  });
+
   it('uses a searchable model dropdown for the active Local CLI model picker', async () => {
     render(
       <I18nProvider>
