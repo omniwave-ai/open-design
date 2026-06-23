@@ -1,34 +1,25 @@
-# Open Design — Coolify deployment (BUILD FROM SOURCE, single shared login)
+# Open Design — Coolify deployment (build from source, single shared login)
 # =============================================================================
-# This file lives in a FORK of nexu-io/open-design so Coolify can BUILD the app
-# from source. The upstream prebuilt image (ghcr.io/nexu-io/od) is PRIVATE / not
-# anonymously pullable, so we build deploy/Dockerfile on the server instead of
-# pulling. (openclaw has plenty of RAM/CPU for the build.)
+# Builds from this fork (the upstream prebuilt image is private). Runs behind
+# Coolify's Traefik proxy; the single shared gate is Coolify Basic Auth.
 #
-# Open Design is local-first and ships NO multi-user auth — access is a single
-# shared gate: Coolify Basic Auth in front of the domain.
+# LOCAL CODING AGENTS (mounted, NOT baked into the image)
+#   Open Design detects an agent only when its CLI BINARY is on PATH. The image
+#   ships none, so we mount them from the host instead of rebuilding:
+#     1. Install on the host (musl build, matches the Alpine runtime):
+#          sudo docker run --rm -v /opt/od-agents:/agents node:24-alpine \
+#            sh -lc 'npm i -g opencode-ai --prefix /agents'
+#          sudo chmod -R a+rX /opt/od-agents
+#     2. It's mounted read-only at /agents and /agents/bin is on PATH -> detected.
+#     3. HOME points at a writable dir in the data volume for the CLI's config/auth.
+#     4. Set a provider key in Coolify env (ANTHROPIC_API_KEY / OPENAI_API_KEY /
+#        OPENROUTER_API_KEY) so the CLI can call models.
+#   Add more Node/musl CLIs later by `npm i -g <pkg> --prefix /agents` (e.g.
+#   @anthropic-ai/claude-code, @google/gemini-cli, @qwen-code/qwen-code, @github/copilot).
 #
-# PORTS:
-#   - No `ports:` — Coolify's Traefik owns the public 443/80 entry point.
-#   - `expose: "7456"` declares the internal container port for Traefik (NOT a
-#     host publish). The domain -> container:7456 mapping is set in the Coolify
-#     dashboard, matching the ai-receptionist / ai-influencer pattern.
-#
-# AUTH:
-#   - OD_DISABLE_API_AUTH=1 makes the daemon trust the proxy; Coolify Basic Auth
-#     is the authenticator. MANDATORY or the instance is publicly open.
-#
-# COOLIFY SETUP
-#   1. Docker Compose resource -> Git source = omniwave-ai/open-design,
-#      branch main, Compose Location = /docker-compose.coolify.yml.
-#   2. Domains field: https://design.example.com:7456  (:7456 = container port;
-#      public stays on 443).
-#   3. Env var: OD_ALLOWED_ORIGINS = your exact https origin (no port, no slash).
-#   4. Add Basic Auth (Traefik basic-auth middleware label). MANDATORY.
-#   5. Deploy — first build is ~10-15 min (pnpm install + Next build).
-#
-# UPDATING: click GitHub's "Sync fork" button on omniwave-ai/open-design to pull
-# new upstream releases (this single file does not conflict), then Redeploy.
+# PORTS: no host `ports:`; `expose: 7456` is the internal port; the domain ->
+#   container:7456 mapping is set in the Coolify dashboard (https://domain:7456).
+# AUTH: OD_DISABLE_API_AUTH=1 + Coolify Basic Auth is the ONLY gate (mandatory).
 # =============================================================================
 
 services:
@@ -39,23 +30,28 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - OD_BIND_HOST=0.0.0.0        # listen on all interfaces inside the container
-      - OD_PORT=7456                # container port the daemon serves UI + API on
+      - OD_BIND_HOST=0.0.0.0
+      - OD_PORT=7456
       - OD_WEB_PORT=7456
-      # Set OD_ALLOWED_ORIGINS in the Coolify dashboard to your exact public
-      # origin (https://your-domain, no port). Browser /api calls whose Origin
-      # doesn't match are rejected.
       - OD_ALLOWED_ORIGINS=${OD_ALLOWED_ORIGINS}
-      # Trust Coolify's proxy as the authenticator (Basic Auth gates the domain).
       - OD_DISABLE_API_AUTH=1
-      - NODE_OPTIONS=--max-old-space-size=192
-      # Optional: only if Codex runs fail with workspace-write sandbox errors in
-      # an unprivileged container (trusted single-user deployments only).
-      # - OD_CODEX_SANDBOX=danger-full-access
+      - NODE_OPTIONS=--max-old-space-size=512
+      # Writable HOME inside the data volume (owned by the app user) — where the
+      # mounted CLIs store config/auth. Kept off the read-only /agents mount.
+      # Safe: the daemon's data dir is /app/.od (projectRoot-based, not HOME).
+      - HOME=/app/.od/agent-home
+      # Put the mounted CLI bin dir on PATH so agent detection finds opencode.
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/agents/bin
+      # Provider keys for the agent CLIs — set whichever you use in Coolify env.
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
     expose:
-      - "7456"                     # internal port for Traefik; NOT published to host
+      - "7456"
     volumes:
-      - open_design_data:/app/.od  # persistent daemon data (SQLite, projects, artifacts)
+      - open_design_data:/app/.od
+      # Coding-agent CLIs installed on the host at /opt/od-agents (read-only).
+      - /opt/od-agents:/agents:ro
     healthcheck:
       test:
         [
@@ -67,7 +63,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 60s    # heavy first boot (150+ design systems/skills baked in)
+      start_period: 60s
     security_opt:
       - no-new-privileges:true
 
