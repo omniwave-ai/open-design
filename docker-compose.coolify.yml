@@ -28,6 +28,15 @@ services:
       context: .
       dockerfile: deploy/Dockerfile
     restart: always
+    # Single shared login (Basic Auth) at the Traefik proxy — the only gate
+    # (OD_DISABLE_API_AUTH=1). Set OD_BASICAUTH in the Coolify dashboard env to
+    # "user:bcrypt-hash" (generate with `htpasswd -nbB <user> <pass>`); kept out
+    # of this public repo. The `coolify.traefik.middlewares` shorthand attaches
+    # the middleware to THIS service's router automatically (alongside gzip) — no
+    # router name needed, and it survives Coolify's label regeneration.
+    labels:
+      - "traefik.http.middlewares.od-auth.basicauth.users=${OD_BASICAUTH}"
+      - "coolify.traefik.middlewares=od-auth"
     environment:
       - NODE_ENV=production
       - OD_BIND_HOST=0.0.0.0
