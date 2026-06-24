@@ -65,6 +65,8 @@ services:
       - open_design_data:/app/.od
       # Coding-agent CLIs installed on the host at /opt/od-agents (read-only).
       - /opt/od-agents:/agents:ro
+      # Your code workspace — agents read/write here (cwd / linkedDirs --add-dir).
+      - /opt/od-workspace:/workspace:rw
     healthcheck:
       test:
         [
