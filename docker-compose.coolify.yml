@@ -56,6 +56,9 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      # Codex cannot create its workspace-write sandbox in an unprivileged
+      # container, so run it full-access (trusted single-user deployment).
+      - OD_CODEX_SANDBOX=danger-full-access
     expose:
       - "7456"
     volumes:
