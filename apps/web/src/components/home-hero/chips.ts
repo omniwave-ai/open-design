@@ -33,7 +33,13 @@ import type { IconName } from '../Icon';
 // independently of the default-binding mapping.
 export type ChipScenarioPluginId =
   | DefaultScenarioPluginId
-  | 'example-hyperframes';
+  | 'example-hyperframes'
+  // Powered-preview scenarios: real-time GPU / off-main-thread artifacts that
+  // render in the cross-origin-isolated "powered preview" iframe. They ship
+  // their own bundled example plugins under plugins/_official/examples/, so —
+  // like example-hyperframes — they carry their plugin id directly rather than
+  // routing through the default kind→plugin table.
+  | 'example-webgl-experience';
 
 export type ChipAction =
   | {
@@ -193,6 +199,11 @@ export const HOME_HERO_CHIPS: ReadonlyArray<HomeHeroChip> = [
       kind: 'apply-scenario',
       pluginId: 'od-new-generation',
       projectKind: 'other',
+      inputs: {
+        artifactKind: 'document',
+        audience: 'readers',
+        topic: 'the user brief',
+      },
       projectMetadata: {
         kind: 'other',
         // Analytics-only tag: splits this card's projects out of generic
@@ -214,6 +225,27 @@ export const HOME_HERO_CHIPS: ReadonlyArray<HomeHeroChip> = [
     // primary category list, so the rail picks it up too rather than
     // hiding the specialised bucket behind the generic Video chip.
     action: { kind: 'apply-scenario', pluginId: 'example-hyperframes', projectKind: 'video' },
+  },
+  {
+    id: 'webgl',
+    label: 'WebGL experience',
+    icon: 'sparkles',
+    group: 'create',
+    description: 'Shaders, 3D & generative GPU visuals',
+    hint: 'Build a full-screen real-time WebGL2 shader / 3D scene that runs live on the GPU.',
+    // Powered-preview scenario: binds the bundled `example-webgl-experience`
+    // plugin (shader/3D seed + P0 checklist). The artifact auto-detects into
+    // powered preview via its `getContext('webgl2')` call.
+    action: {
+      kind: 'apply-scenario',
+      pluginId: 'example-webgl-experience',
+      projectKind: 'prototype',
+      projectMetadata: {
+        kind: 'prototype',
+        intent: 'webgl-experience',
+        fidelity: 'high-fidelity',
+      },
+    },
   },
   {
     id: 'live-artifact',
@@ -339,6 +371,7 @@ export const CREATE_RAIL_ORDER = [
   'mobile',
   'document',
   'hyperframes',
+  'webgl',
   'live-artifact',
   'image',
   'video',
