@@ -28,6 +28,7 @@ import {
   getDesignToolboxAction,
   type DesignToolboxActionId,
 } from '../runtime/design-toolbox';
+import { isRetryableAssistantTerminalFailure } from '../runtime/design-delivery';
 import type { Dict } from '../i18n/types';
 import { copyToClipboard } from '../lib/copy-to-clipboard';
 import { projectRawUrl } from '../providers/registry';
@@ -71,6 +72,7 @@ import { RESUME_CONTINUE_PROMPT } from '../runtime/resume';
 import {
   ChatComposer,
   type ChatComposerHandle,
+  type ChatSendOutcome,
   type ChatSendMeta,
 } from './ChatComposer';
 import type { PlaceholderScenario } from './home-hero/placeholderScenarios';
@@ -476,6 +478,9 @@ interface Props {
   // Names that exist in the project folder. Tool cards and chips use this
   // set to decide whether a path can be opened as a tab.
   projectFileNames?: Set<string>;
+  // Daemon-resolved on-disk working directory of the current project —
+  // positive-proof anchor for chat file-link routing (see AssistantMessage).
+  projectResolvedDir?: string | null;
   onEnsureProject: () => Promise<string | null>;
   previewComments?: PreviewComment[];
   attachedComments?: PreviewComment[];
@@ -487,7 +492,7 @@ interface Props {
     attachments: ChatAttachment[],
     commentAttachments: ChatCommentAttachment[],
     meta?: ChatSendMeta,
-  ) => void;
+  ) => ChatSendOutcome | Promise<ChatSendOutcome>;
   onRetry?: (assistantMessage: ChatMessage) => void;
   onResumeRun?: (assistantMessage: ChatMessage) => void;
   onStop: () => void;
@@ -786,6 +791,7 @@ export function ChatPane({
   hasActiveDesignSystem = false,
   activeDesignSystem = null,
   projectFileNames,
+  projectResolvedDir,
   onEnsureProject,
   previewComments = [],
   attachedComments = [],
@@ -2043,7 +2049,15 @@ export function ChatPane({
         anchorActiveRef.current = false;
         resetTailSpacer();
         anchorPendingRef.current = true;
-        onSend(prompt, attachments, commentAttachments, meta);
+        const outcome = onSend(prompt, attachments, commentAttachments, meta);
+        if (outcome instanceof Promise) {
+          return outcome.then((result) => {
+            if (result === 'restore-draft') anchorPendingRef.current = false;
+            return result;
+          });
+        }
+        if (outcome === 'restore-draft') anchorPendingRef.current = false;
+        return outcome;
       }}
       onStop={onStop}
       onOpenSettings={onOpenSettings}
@@ -2343,6 +2357,7 @@ export function ChatPane({
                 projectFiles={projectFiles}
                 projectMetadata={projectMetadata}
                 projectFileNames={projectFileNames}
+                projectResolvedDir={projectResolvedDir}
                 onRequestOpenFile={onRequestOpenFile}
                 onRequestPluginDetails={onRequestPluginDetails}
                 onRequestDesignSystemDetails={onRequestDesignSystemDetails}
@@ -2787,6 +2802,7 @@ function ChatRows({
   projectFiles,
   projectMetadata,
   projectFileNames,
+  projectResolvedDir,
   onRequestOpenFile,
   onRequestPluginDetails,
   onRequestDesignSystemDetails,
@@ -2841,6 +2857,9 @@ function ChatRows({
   projectFiles: ProjectFile[];
   projectMetadata?: ProjectMetadata;
   projectFileNames?: Set<string>;
+  // Daemon-resolved on-disk working directory of the current project —
+  // positive-proof anchor for chat file-link routing (see AssistantMessage).
+  projectResolvedDir?: string | null;
   onRequestOpenFile?: (name: string) => void;
   onRequestPluginDetails?: (pluginId: string) => void;
   onRequestDesignSystemDetails?: (system: DesignSystemSummary) => void;
@@ -2961,6 +2980,7 @@ function ChatRows({
         projectFiles={projectFiles}
         projectMetadata={projectMetadata}
         projectFileNames={projectFileNames}
+        projectResolvedDir={projectResolvedDir}
         onRequestOpenFile={onRequestOpenFile}
         onRequestPluginFolderAgentAction={onRequestPluginFolderAgentAction}
         activePluginActionPaths={activePluginActionPaths}
@@ -3708,7 +3728,7 @@ export function retryableAssistantMessage(
   const last = messages[messages.length - 1];
   if (!last || last.role !== 'assistant') return null;
   if (last.id !== lastAssistantId) return null;
-  return last.runStatus === 'failed' ? last : null;
+  return isRetryableAssistantTerminalFailure(last) ? last : null;
 }
 
 export function isAssistantMessageStreaming(
