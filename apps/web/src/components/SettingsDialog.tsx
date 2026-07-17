@@ -315,8 +315,8 @@ export function deriveAboutUpdateControl(
           primaryAction: 'quit',
           primaryLabelKey: 'updater.quitButton',
           showReleaseLink: false,
-          statusKey: 'settings.updateQuitFailed',
-          statusTone: 'warning',
+          statusKey: model.updateKind === 'payload' ? 'updater.installingRestart' : 'updater.opening',
+          statusTone: 'neutral',
         };
       }
       const canInstallUpdate = model.canOpenInstaller || model.canApplyInPlace;
@@ -343,14 +343,22 @@ export function deriveAboutUpdateControl(
         statusKey: 'settings.updateStatusInstalling',
         statusTone: 'neutral',
       };
-    case 'error':
+    case 'error': {
+      const canRetryInstall = model.status.downloadPath != null
+        && (model.canOpenInstaller || model.canApplyInPlace);
+      const primaryAction: AboutUpdatePrimaryAction = canRetryInstall
+        ? 'install'
+        : model.availableVersion != null && model.canDownload
+          ? 'download'
+          : 'check';
       return {
-        primaryAction: 'check',
+        primaryAction,
         primaryLabelKey: 'settings.updateRetry',
         showReleaseLink: true,
-        statusKey: 'settings.updateStatusFailed',
+        statusKey: 'updater.failed',
         statusTone: 'error',
       };
+    }
     case 'unsupported':
       return {
         primaryAction: null,
@@ -390,6 +398,12 @@ interface Props {
    * incremental save, not a final commit.
    */
   onPersist: (cfg: AppConfig, options?: { forceMediaProviderSync?: boolean }) => Promise<void> | void;
+  /**
+   * Non-optimistic write for the daemon-owned silent-update preference.
+   * Settings → About uses this instead of the generic autosave path so a
+   * failed `/api/app-config` cannot leave app-wide config on the rejected value.
+   */
+  onSilentUpdatePreferenceChange?: (allowSilentUpdates: boolean) => Promise<void>;
   onDraftChange?: (cfg: AppConfig) => void;
   /**
    * Persist the Composio API key separately from the broader autosave
@@ -1330,6 +1344,7 @@ export function SettingsDialog({
   initialSection = 'execution',
   initialHighlight = null,
   onPersist,
+  onSilentUpdatePreferenceChange,
   onPersistComposioKey,
   composioConfigLoading = false,
   onClose,
@@ -1683,17 +1698,22 @@ export function SettingsDialog({
   >(() => new Set());
   const [aboutUpdaterModel, setAboutUpdaterModel] = useState<UpdaterModel>(() => deriveUpdaterModel(null));
   const [aboutUpdateActionBusy, setAboutUpdateActionBusy] = useState(false);
+  const [aboutUpdateQuitFailed, setAboutUpdateQuitFailed] = useState(false);
   const [aboutToast, setAboutToast] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
     const unsubscribe = subscribeToUpdaterStatus((status) => {
       if (!mounted) return;
-      setAboutUpdaterModel(deriveUpdaterModel(status, { hostAvailable: true }));
+      const nextModel = deriveUpdaterModel(status, { hostAvailable: true });
+      setAboutUpdaterModel(nextModel);
+      if (!nextModel.installerOpened) setAboutUpdateQuitFailed(false);
     });
     void readUpdaterStatus({ payload: { source: 'settings-about:mount' } }).then((result) => {
       if (!mounted) return;
-      setAboutUpdaterModel(result.ok ? result.model : deriveUpdaterModel(null, { hostAvailable: false }));
+      const nextModel = result.ok ? result.model : deriveUpdaterModel(null, { hostAvailable: false });
+      setAboutUpdaterModel(nextModel);
+      if (!nextModel.installerOpened) setAboutUpdateQuitFailed(false);
     });
     return () => {
       mounted = false;
@@ -1701,10 +1721,18 @@ export function SettingsDialog({
     };
   }, []);
 
-  const aboutUpdateControl = useMemo(
-    () => deriveAboutUpdateControl(aboutUpdaterModel, appVersionInfo),
-    [aboutUpdaterModel, appVersionInfo],
-  );
+  const aboutUpdateControl = useMemo(() => {
+    const control = deriveAboutUpdateControl(aboutUpdaterModel, appVersionInfo);
+    if (!aboutUpdateQuitFailed || !aboutUpdaterModel.installerOpened) return control;
+    return {
+      ...control,
+      primaryAction: 'quit' as const,
+      primaryLabelKey: 'updater.quitButton' as const,
+      showReleaseLink: false,
+      statusKey: 'updater.quitFailedTitle' as const,
+      statusTone: 'warning' as const,
+    };
+  }, [aboutUpdateQuitFailed, aboutUpdaterModel, appVersionInfo]);
 
   const applyAboutUpdaterResult = useCallback((result: UpdaterActionResult): boolean => {
     if (!result.ok) {
@@ -1722,6 +1750,8 @@ export function SettingsDialog({
   const handleAboutUpdateAction = useCallback(async () => {
     if (aboutUpdateActionBusy || aboutUpdaterModel.busy || aboutUpdateControl.primaryAction == null) return;
     setAboutUpdateActionBusy(true);
+    setAboutUpdateQuitFailed(false);
+    let quitAttempted = false;
     try {
       const options = { payload: { source: 'settings-about' } };
       if (aboutUpdateControl.primaryAction === 'check') {
@@ -1729,16 +1759,25 @@ export function SettingsDialog({
       } else if (aboutUpdateControl.primaryAction === 'download') {
         applyAboutUpdaterResult(await downloadUpdaterUpdate(options));
       } else if (aboutUpdateControl.primaryAction === 'quit') {
+        quitAttempted = true;
         const quitResult = await quitAfterUpdaterInstallerOpen(options);
-        if (!quitResult.ok) setAboutToast(t('settings.updateQuitFailed'));
+        if (!quitResult.ok) {
+          setAboutUpdateQuitFailed(true);
+          setAboutToast(t('updater.quitFailedTitle'));
+        }
       } else {
         const installed = applyAboutUpdaterResult(await openUpdaterInstaller(options));
         if (installed) {
+          quitAttempted = true;
           const quitResult = await quitAfterUpdaterInstallerOpen(options);
-          if (!quitResult.ok) setAboutToast(t('settings.updateQuitFailed'));
+          if (!quitResult.ok) {
+            setAboutUpdateQuitFailed(true);
+            setAboutToast(t('updater.quitFailedTitle'));
+          }
         }
       }
     } catch {
+      if (quitAttempted) setAboutUpdateQuitFailed(true);
       setAboutToast(t('settings.updateActionFailed'));
     } finally {
       setAboutUpdateActionBusy(false);
@@ -2754,10 +2793,17 @@ export function SettingsDialog({
       model: '',
     },
     {
-      id: 'siliconflow',
-      title: '硅基流动',
+      id: 'siliconflow-cn',
+      title: 'SiliconFlow (CN)',
       protocol: 'openai',
       baseUrl: 'https://api.siliconflow.cn/v1',
+      model: 'deepseek-ai/DeepSeek-V3.1',
+    },
+    {
+      id: 'siliconflow-global',
+      title: 'SiliconFlow (Global)',
+      protocol: 'openai',
+      baseUrl: 'https://api.siliconflow.com/v1',
       model: 'deepseek-ai/DeepSeek-V3.1',
     },
     {
@@ -3035,6 +3081,11 @@ export function SettingsDialog({
   // Skip the very first effect tick so just opening the dialog doesn't
   // appear to "save" anything before the user has touched a field.
   const autosaveSkipFirstRef = useRef(true);
+  // Silent-update toggles use a dedicated non-optimistic path; skip the next
+  // autosave effect tick so we do not double-write through handleConfigPersist.
+  const suppressNextAutosaveRef = useRef(false);
+  const silentUpdateWriteTokenRef = useRef(0);
+  const [silentUpdateBusy, setSilentUpdateBusy] = useState(false);
   const autosaveTimerRef = useRef<number | null>(null);
   const autosaveSavedTimerRef = useRef<number | null>(null);
   const autosaveRetryTimerRef = useRef<number | null>(null);
@@ -3055,6 +3106,10 @@ export function SettingsDialog({
     if (autosaveSkipFirstRef.current) {
       autosaveSkipFirstRef.current = false;
       autosaveLastSavedRef.current = cfg;
+      return;
+    }
+    if (suppressNextAutosaveRef.current) {
+      suppressNextAutosaveRef.current = false;
       return;
     }
     setAutosaveStatus('pending');
@@ -5669,6 +5724,7 @@ export function SettingsDialog({
                   <input
                     checked={cfg.allowSilentUpdates === true}
                     data-testid="settings-allow-silent-updates"
+                    disabled={silentUpdateBusy}
                     type="checkbox"
                     onChange={(event) => {
                       // Capture before setState: React clears event.currentTarget
@@ -5676,10 +5732,53 @@ export function SettingsDialog({
                       // run later when SettingsDialog already has pending lanes
                       // (about-updater status, autosave indicator, etc.).
                       const allowSilentUpdates = event.currentTarget.checked;
+                      const previous = cfg.allowSilentUpdates;
+                      // Dedicated non-optimistic path: do not flush through
+                      // handleConfigPersist (which setConfig before daemon write).
+                      // Serialize via busy + write token so a slow earlier save
+                      // cannot re-apply UI after a later toggle.
+                      const writeToken = ++silentUpdateWriteTokenRef.current;
+                      suppressNextAutosaveRef.current = true;
                       setCfg((current) => ({
                         ...current,
                         allowSilentUpdates,
                       }));
+                      if (onSilentUpdatePreferenceChange == null) return;
+                      setSilentUpdateBusy(true);
+                      void (async () => {
+                        try {
+                          await onSilentUpdatePreferenceChange(allowSilentUpdates);
+                          if (writeToken !== silentUpdateWriteTokenRef.current) return;
+                          // Only advance the baseline for this daemon-owned field.
+                          // Spreading autosaveLatestRef would stamp any concurrent
+                          // draft (theme, accent, …) as already saved and let the
+                          // generic autosave skip a real onPersist for that edit.
+                          autosaveLastSavedRef.current = {
+                            ...autosaveLastSavedRef.current,
+                            allowSilentUpdates,
+                          };
+                          setAutosaveStatus('saved');
+                          if (autosaveSavedTimerRef.current != null) {
+                            window.clearTimeout(autosaveSavedTimerRef.current);
+                          }
+                          autosaveSavedTimerRef.current = window.setTimeout(() => {
+                            autosaveSavedTimerRef.current = null;
+                            setAutosaveStatus((curr) => (curr === 'saved' ? 'idle' : curr));
+                          }, 1800);
+                        } catch {
+                          if (writeToken !== silentUpdateWriteTokenRef.current) return;
+                          suppressNextAutosaveRef.current = true;
+                          setCfg((current) => ({
+                            ...current,
+                            allowSilentUpdates: previous,
+                          }));
+                          setAutosaveStatus('error');
+                        } finally {
+                          if (writeToken === silentUpdateWriteTokenRef.current) {
+                            setSilentUpdateBusy(false);
+                          }
+                        }
+                      })();
                     }}
                   />
                   <span className="settings-about-toggle-copy">
