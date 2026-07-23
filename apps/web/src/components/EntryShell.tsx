@@ -138,6 +138,7 @@ import {
   EntrySettingsMenu,
   type EntrySettingsSection,
 } from './EntrySettingsMenu';
+import { MessageCenter } from './MessageCenter';
 import { NewProjectModal } from './NewProjectModal';
 import { PluginsView } from './PluginsView';
 import type { CreateInput, CreateTab, ImportClaudeDesignOutcome } from './NewProjectPanel';
@@ -153,7 +154,10 @@ import {
   API_PROTOCOL_TABS,
   SUGGESTED_MODELS_BY_PROTOCOL,
 } from '../state/apiProtocols';
-import { KNOWN_PROVIDERS } from '../state/config';
+import {
+  defaultKnownProviderModel,
+  KNOWN_PROVIDERS,
+} from '../state/config';
 import type { KnownProvider } from '../state/config';
 import { saveOnboardingProfile } from '../state/onboarding-profile';
 import { testAgent, testApiProvider } from '../providers/connection-test';
@@ -177,6 +181,7 @@ import {
   providerModelsCacheKey,
   type ProviderModelsCache,
 } from './providerModelsCache';
+import { resolveByokModelPreference } from './byok/validation';
 
 // Persist the entry nav-rail open/collapsed state so it survives both a
 // home -> project -> home navigation (EntryShell unmounts on the project
@@ -383,7 +388,7 @@ interface Props {
   onAgentChange: (id: string) => void;
   onAgentModelChange: (
     id: string,
-    choice: { model?: string; reasoning?: string },
+    choice: { model?: string; reasoning?: string; serviceTier?: string },
   ) => void;
   onApiProtocolChange: (protocol: ApiProtocol) => void;
   onApiModelChange: (model: string) => void;
@@ -1083,6 +1088,9 @@ export function EntryShell({
               }
             />
             <WhatsNewPopup active={view === 'home'} />
+            <MessageCenter
+              onOpenNotificationSettings={() => onOpenSettings('notifications')}
+            />
             {avatarMenu}
             {amrBalanceGateBlock ? (
               <AmrBalanceDialog
@@ -1306,7 +1314,7 @@ function OnboardingView({
   onAgentChange: (id: string) => void;
   onAgentModelChange: (
     id: string,
-    choice: { model?: string; reasoning?: string },
+    choice: { model?: string; reasoning?: string; serviceTier?: string },
   ) => void;
   onApiProtocolChange: (protocol: ApiProtocol) => void;
   onApiModelChange: (model: string) => void;
@@ -1877,7 +1885,9 @@ function OnboardingView({
     activeProviderModelsCache[providerModelsInputKey] ?? [];
   const byokModelOptions = mergeOnboardingProviderModelOptions(
     fetchedProviderModels,
-    SUGGESTED_MODELS_BY_PROTOCOL[apiProtocol],
+    selectedProvider?.preferredModels.length
+      ? selectedProvider.preferredModels
+      : SUGGESTED_MODELS_BY_PROTOCOL[apiProtocol],
     config.model,
   ).map((model) => ({
     value: model.id,
@@ -1914,14 +1924,12 @@ function OnboardingView({
     void onConfigPersist(nextConfig);
   }
 
-  function selectFirstProviderModelWhenEmpty(
+  function selectPreferredProviderModelWhenEmpty(
     models: readonly ProviderModelOption[],
     expectedInputKey: string,
   ) {
-    const firstModel = models[0];
     const current = providerModelAutoSelectRef.current;
     if (
-      !firstModel ||
       current.runtime !== 'byok' ||
       current.step !== 0 ||
       current.providerModelsInputKey !== expectedInputKey ||
@@ -1929,8 +1937,14 @@ function OnboardingView({
     ) {
       return;
     }
-    onApiModelChange(firstModel.id);
-    updateApiConfig({ model: firstModel.id });
+    const preference = resolveByokModelPreference({
+      currentModel: '',
+      accountModels: models,
+      providerPreferredModels: selectedProvider?.preferredModels ?? [],
+    });
+    if (!preference.model) return;
+    onApiModelChange(preference.model);
+    updateApiConfig({ model: preference.model });
   }
 
   function clearAgentRevealTimers() {
@@ -2458,7 +2472,7 @@ function OnboardingView({
     providerModelsAutoFetchKeyRef.current = inputKey;
     const cachedModels = activeProviderModelsCache[inputKey];
     if (cachedModels) {
-      selectFirstProviderModelWhenEmpty(cachedModels, inputKey);
+      selectPreferredProviderModelWhenEmpty(cachedModels, inputKey);
       setProviderModelsState({
         status: 'done',
         inputKey,
@@ -2479,7 +2493,7 @@ function OnboardingView({
         apiKey: config.apiKey,
       });
       if (result.ok && result.models?.length) {
-        selectFirstProviderModelWhenEmpty(result.models, inputKey);
+        selectPreferredProviderModelWhenEmpty(result.models, inputKey);
         activeSetProviderModelsCache((current) => ({
           ...current,
           [inputKey]: result.models ?? [],
@@ -2731,7 +2745,10 @@ function OnboardingView({
                     }}
                     onSelectModel={(model) => {
                       if (!selectedAgent) return;
-                      onAgentModelChange(selectedAgent.id, { model });
+                      onAgentModelChange(selectedAgent.id, {
+                        model,
+                        serviceTier: undefined,
+                      });
                     }}
                     testState={visibleAgentTestState}
                     canTest={canTestAgent}
@@ -2757,7 +2774,7 @@ function OnboardingView({
                       );
                       updateApiConfig({
                         baseUrl: provider?.baseUrl ?? '',
-                        model: provider?.model ?? '',
+                        model: defaultKnownProviderModel(provider),
                         apiProviderBaseUrl: provider?.baseUrl ?? null,
                       });
                     }}
@@ -3432,7 +3449,7 @@ function OnboardingByokSetupPanel({
         {modelOptions.length > 0 ? (
           <OnboardingDropdown
             label={t('settings.model')}
-            placeholder={selectedProvider?.model ?? 'claude-sonnet-4-5'}
+            placeholder={defaultKnownProviderModel(selectedProvider) || 'claude-sonnet-4-5'}
             value={model}
             options={modelOptions}
             onChange={onModelChange}
@@ -3446,7 +3463,7 @@ function OnboardingByokSetupPanel({
             <input
               type="text"
               value={model}
-              placeholder={selectedProvider?.model ?? 'claude-sonnet-4-5'}
+              placeholder={defaultKnownProviderModel(selectedProvider) || 'claude-sonnet-4-5'}
               onChange={(event) => onModelChange(event.target.value.trim())}
             />
           </label>

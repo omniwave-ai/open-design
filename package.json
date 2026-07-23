@@ -1,6 +1,6 @@
 {
   "name": "open-design",
-  "version": "0.15.1",
+  "version": "0.16.1",
   "private": true,
   "packageManager": "pnpm@10.33.2",
   "type": "module",
@@ -11,6 +11,7 @@
   },
   "scripts": {
     "postinstall": "node ./scripts/postinstall.mjs",
+    "bootstrap": "node ./scripts/postinstall.mjs",
     "tools-dev": "pnpm exec tools-dev",
     "tools-pack": "pnpm exec tools-pack",
     "tools-release": "pnpm exec tools-release",
