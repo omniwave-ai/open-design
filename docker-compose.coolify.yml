@@ -36,7 +36,7 @@ services:
     # The `coolify.traefik.middlewares` shorthand attaches this middleware to the
     # service's router automatically (alongside gzip) — no router name needed.
     labels:
-      - "traefik.http.middlewares.od-auth.basicauth.users=designer:$2b$10$vSEAam6cPUuIstDJ0XxcUuzplbzg5C/mR8/1G6z9HbBmvP0snREtG"
+      - "traefik.http.middlewares.od-auth.basicauth.users=designer:$2b$10$ZRaIMa5IERfVoAZ6L14Lr.8UjPPdx1IN1UBPJq/faJY5d7fCBe1om"
       - "coolify.traefik.middlewares=od-auth"
     environment:
       - NODE_ENV=production
