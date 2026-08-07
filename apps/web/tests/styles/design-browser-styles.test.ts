@@ -54,10 +54,6 @@ const STYLELESS_HOOKS = new Set([
   'db-inspect-padding',
   'db-inspect-radius',
   'db-inspect-weight',
-  'db-viewport-height',
-  'db-viewport-icon',
-  'db-viewport-menu-label',
-  'db-viewport-width',
 ]);
 
 describe('design browser panel styles', () => {
@@ -91,12 +87,7 @@ describe('design browser panel styles', () => {
     // Spot-check a couple of declarations so an empty stub file cannot satisfy
     // the presence check above.
     const chrome = /\.db-chrome\s*\{([^}]*)\}/.exec(designBrowserCss)?.[1] ?? '';
-    expect(chrome).toMatch(/grid-template-columns/);
-    // Equal side tracks center the address omnibox; auto/max-content sides
-    // shift it when left nav and right actions have different widths.
-    expect(chrome).toMatch(
-      /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\([^)]+\)\s+minmax\(0,\s*1fr\)/,
-    );
+    expect(chrome).toMatch(/display:\s*flex/);
     const board = /\.db-reference-board\s*\{([^}]*)\}/.exec(designBrowserCss)?.[1] ?? '';
     expect(board).toMatch(/(grid|flex|padding)/);
   });

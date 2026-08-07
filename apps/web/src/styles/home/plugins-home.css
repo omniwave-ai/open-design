@@ -39,7 +39,7 @@
   letter-spacing: -0.01em;
 }
 .plugins-home__count {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -49,147 +49,26 @@
   gap: 10px;
   flex: 0 0 auto;
 }
-/* Shared trigger for the two collapsed facet tools (sort menu, search).
-   Sized to match the pill height so the tools cluster and the chip strip
-   sit on one baseline. */
-.plugins-home__icon-btn {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--bg-panel);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: border-color 120ms var(--ease-out), background-color 120ms var(--ease-out),
-    color 120ms var(--ease-out);
-}
-.plugins-home__icon-btn:hover {
-  border-color: var(--border-strong);
-  color: var(--text);
-}
-.plugins-home__icon-btn[aria-expanded='true'] {
-  background: var(--bg-subtle);
-  color: var(--text);
-}
-.plugins-home__icon-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-/* Collapsed, the trigger is the only thing saying a filter is in force —
-   so a non-default pick gets a dot in the corner. */
-.plugins-home__icon-btn[data-active='true'] {
-  position: relative;
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  color: var(--accent);
-}
-.plugins-home__icon-btn[data-active='true']::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 1.5px solid var(--bg);
-}
-
-/* Hot / newest ordering, collapsed behind the filter trigger. */
-.plugins-home__sort {
-  position: relative;
-  display: inline-flex;
-  flex: 0 0 auto;
-}
-.plugins-home__sort-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  min-width: 150px;
-  padding: 4px;
-  gap: 2px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-panel);
-  box-shadow: var(--shadow-md, 0 8px 24px rgb(0 0 0 / 12%));
-}
-.plugins-home__sort-item {
-  appearance: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  padding: 6px 8px;
-  border: 0;
-  border-radius: var(--radius-sm, 6px);
-  background: transparent;
-  font-size: 12px;
-  color: var(--text-muted);
-  text-align: left;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
-}
-.plugins-home__sort-item:hover {
-  background: var(--bg-subtle);
-  color: var(--text);
-}
-.plugins-home__sort-item.is-active {
-  color: var(--text);
-}
-.plugins-home__sort-item:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
-}
-
-/* Search collapses to its own icon and grows into a field on demand, so
-   the category strip keeps the row's remaining width. Both states stay
-   mounted and swap `.is-expanded` — the width has to animate in both
-   directions, which an unmount would skip. */
 .plugins-home__search {
   position: relative;
   display: inline-flex;
   align-items: center;
-  flex: 0 0 auto;
-  width: 28px;
-  max-width: 100%;
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  transition: width 200ms var(--ease-out), border-color 200ms var(--ease-out),
-    background-color 200ms var(--ease-out), box-shadow 120ms var(--ease-out);
-}
-.plugins-home__search.is-expanded {
   width: 200px;
-  border-color: var(--border);
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
   background: var(--bg-panel);
+  transition: border-color 120ms var(--ease-out), background-color 120ms var(--ease-out),
+    box-shadow 120ms var(--ease-out);
 }
 .plugins-home__search:focus-within {
   border-color: var(--border-strong);
-  box-shadow: 0 0 0 3px var(--accent-tint);
 }
-/* The toggle doubles as the field's left adornment once expanded, so it
-   sheds its own pill chrome and stops competing with the container. */
-.plugins-home__search.is-expanded .plugins-home__search-toggle {
+.plugins-home__search-icon {
   position: absolute;
-  left: 0;
-  width: 26px;
-  height: 26px;
-  border-color: transparent;
-  background: transparent;
+  left: 10px;
   color: var(--text-faint);
-}
-.plugins-home__search.is-expanded .plugins-home__search-toggle::after {
-  display: none;
+  pointer-events: none;
 }
 /* The bare <input> below picks up the global `input { ... }` rule
    from index.css (border, radius-sm, padding, and a rectangular
@@ -209,16 +88,6 @@
   box-shadow: none;
   border-radius: var(--radius-pill);
   font-family: inherit;
-  /* Collapsed the field is 28px of icon button; the input must take no
-     width and swallow no clicks, or it would cover the toggle. */
-  transition: opacity 140ms var(--ease-out);
-}
-.plugins-home__search:not(.is-expanded) .plugins-home__search-input,
-.plugins-home__search:not(.is-expanded) .plugins-home__search-input:focus {
-  width: 0;
-  padding: 0;
-  opacity: 0;
-  pointer-events: none;
 }
 .plugins-home__search-input::placeholder {
   color: var(--text-faint);
@@ -264,10 +133,13 @@
   .plugins-home__head-tools {
     justify-content: flex-end;
   }
-  /* The expanded field would otherwise crowd the chip strip down to a
-     couple of visible pills on a phone. */
-  .plugins-home__search.is-expanded {
-    width: 148px;
+  .plugins-home__facet-tools {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .plugins-home__search {
+    flex: 1;
+    min-width: 0;
   }
 }
 .plugins-home__empty {
@@ -309,7 +181,7 @@
   color: var(--text);
 }
 .plugins-home__chip-count {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
@@ -334,7 +206,7 @@
   border: 0;
   padding: 0;
   margin: 0;
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-muted);
   cursor: pointer;
   text-decoration: underline;
@@ -368,62 +240,31 @@
 .plugins-home__facet-row--inline {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 8px 12px;
   padding: 4px 0;
 }
-/* Right-aligned cluster paired with the chip strip on the same row. Both
-   tools are collapsed to icons, so the cluster is a fixed ~64px and never
-   wraps under the strip — the chips take the width instead, and scroll. */
+/* Right-aligned cluster paired with the chip strip on the same row.
+   Hosts the search input, the filtered-count, and a clear-filters
+   link when at least one facet is active. It can wrap under the
+   chip strip on constrained viewports instead of forcing a local
+   horizontal scrollbar. */
 .plugins-home__facet-tools {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 0 0 auto;
+  flex: 0 1 240px;
   margin-left: auto;
+  min-width: min(100%, 200px);
 }
 .plugins-home__facet-row--sub {
   padding-top: 0;
   opacity: 0.92;
 }
-/* One line, always. Categories used to wrap into as many rows as the
-   taxonomy needed — the deck lane alone pushed the grid a full row down
-   the page — so the strip now scrolls horizontally at a fixed height. */
 .plugins-home__facet-row--inline .plugins-home__facet-pills {
-  flex: 1 1 auto;
-  min-width: 0;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  /* A visible scrollbar under the chips would double the strip's height,
-     defeating the point; the edge fades below carry the affordance. */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  /* Room for the pill hover border and focus ring, which the scroll
-     container would otherwise clip. */
-  padding: 2px 0;
-  scroll-padding-inline: 16px;
-}
-.plugins-home__facet-row--inline .plugins-home__facet-pills::-webkit-scrollbar {
-  display: none;
-}
-/* Fade only the side that is actually clipping. A fade painted
-   unconditionally would dim the last chip of a row that already fits,
-   which reads as a disabled pill. */
-.plugins-home__facet-pills[data-overflow-start='true'] {
-  mask-image: linear-gradient(to right, transparent 0, #000 28px);
-}
-.plugins-home__facet-pills[data-overflow-end='true'] {
-  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
-}
-.plugins-home__facet-pills[data-overflow-start='true'][data-overflow-end='true'] {
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 28px,
-    #000 calc(100% - 28px),
-    transparent 100%
-  );
+  flex: 1 1 360px;
+  flex-wrap: wrap;
+  overflow: visible;
 }
 .plugins-home__facet-row--inline .plugins-home__pill,
 .plugins-home__facet-row--inline .plugins-home__chip {
@@ -431,7 +272,7 @@
 }
 .plugins-home__facet-label {
   padding-top: 7px;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -472,7 +313,7 @@
   opacity: 0.85;
 }
 .plugins-home__pill-count {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
@@ -600,13 +441,8 @@
    plugin's real example page in a scaled-down sandboxed iframe.
    ============================================================ */
 .plugins-home__grid--gallery {
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-}
-@media (min-width: 1400px) {
-  .plugins-home__grid--gallery {
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  }
 }
 .plugins-home__card--gallery {
   cursor: pointer;
@@ -666,7 +502,7 @@
   margin: 0;
   text-align: left;
   cursor: pointer;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-strong);
   white-space: nowrap;
@@ -702,46 +538,13 @@
 }
 .plugins-home__gallery-frame {
   position: relative;
-  height: 300px;
+  /* Keep the original landscape preview proportion (≈4:3) regardless of how
+     wide the fixed 4-column grid makes each card, instead of a fixed pixel
+     height that turns narrower cards squarish. */
+  height: auto;
+  aspect-ratio: 4 / 3;
   background: #fff;
   overflow: hidden;
-}
-.plugins-home__gallery-actions {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
-  z-index: 4;
-  display: flex;
-  gap: 8px;
-  min-width: 0;
-  opacity: 0;
-  transform: translateY(6px);
-  pointer-events: none;
-  transition:
-    opacity 180ms var(--ease-out),
-    transform 180ms var(--ease-out);
-}
-.plugins-home__card--gallery:hover .plugins-home__gallery-actions,
-.plugins-home__card--gallery:focus-within .plugins-home__gallery-actions {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.plugins-home__gallery-actions .plugins-home__action {
-  min-width: 0;
-  flex: 1;
-  height: 38px;
-  padding: 0 14px;
-  font-size: 13px;
-  font-weight: 650;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
-}
-.plugins-home__gallery-actions .plugins-home__action span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 /* PreviewSurface fills the fixed-height gallery frame instead of its
    default 4/3 aspect box. */
@@ -755,14 +558,14 @@
   width: 1440px;
   height: 2200px;
   transform: scale(0.32);
-  transition: top 6s linear;
+  transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-/* Hover auto-pans the scaled preview down to reveal the rest of the
-   page. The iframe stays inert (pointer-events: none, inherited) so a
-   click anywhere on the tile — preview included — opens the detail
-   modal rather than being swallowed by the embedded page. */
+/* Hover zooms the scaled preview in place (0.32 × 1.04), matching the home
+   recent-projects cover zoom — replaces the old 6s scroll-pan reveal. The
+   iframe stays inert (pointer-events: none, inherited) so a click anywhere on
+   the tile opens the detail modal rather than being swallowed by the page. */
 .plugins-home__card--gallery:hover .plugins-home__html-iframe {
-  top: -404px;
+  transform: scale(0.3328);
 }
 /* Decks render inside a 16:9 frame. The tall scroll-preview viewport above would
    letterbox them; instead give deck tiles a 16:9 box and render the iframe at a
@@ -813,11 +616,17 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .plugins-home__media-video {
   position: absolute;
   inset: 0;
   z-index: 1;
+  /* Inline `opacity` (videoReady gate in MediaSurface) fades the clip in once
+     it reports a real decoded frame, instead of popping — see that gate's
+     comment for why it exists (a black first-frame flash on some Chromium
+     builds). */
+  transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1), opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .plugins-home__media-skeleton {
   width: 100%;
@@ -843,8 +652,8 @@
 .plugins-home__media-fallback-glyph {
   color: color-mix(in srgb, var(--accent) 74%, var(--text));
   font-family: var(--serif);
-  font-size: 56px;
-  font-weight: 650;
+  font-size: 52px;
+  font-weight: 600;
   line-height: 1;
   opacity: 0.86;
 }
@@ -903,7 +712,7 @@
   padding: 6px 10px;
   border-top: 1px solid var(--border-soft);
   background: var(--bg-subtle);
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text-faint);
 }
 .plugins-home__html-dot {
@@ -940,7 +749,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 96px;
+  font-size: 64px;
   line-height: 1;
   letter-spacing: -0.04em;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
@@ -951,8 +760,8 @@
   background: rgba(0, 0, 0, 0.32);
   color: rgba(255, 255, 255, 0.78);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(var(--material-thin-blur));
+  backdrop-filter: blur(var(--material-thin-blur));
 }
 
 /* Design-system showcase tile */
@@ -1020,7 +829,7 @@
   position: relative;
   display: flex;
   gap: 10px;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.86);
   z-index: 1;
@@ -1049,7 +858,7 @@
 }
 .plugins-home__text-glyph {
   font-family: var(--serif);
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 600;
   color: var(--accent);
   letter-spacing: -0.02em;
@@ -1097,8 +906,8 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
   color: white;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(var(--material-thin-blur));
+  backdrop-filter: blur(var(--material-thin-blur));
 }
 .plugins-home__card-overlay-body {
   display: flex;
@@ -1131,13 +940,13 @@
   gap: 4px;
 }
 .plugins-home__overlay-tag {
-  font-size: 10.5px;
+  font-size: 12px;
   padding: 2px 7px;
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.18);
   color: white;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(var(--material-thin-blur));
+  backdrop-filter: blur(var(--material-thin-blur));
 }
 .plugins-home__overlay-actions {
   display: flex;
@@ -1203,6 +1012,7 @@
 .plugins-home__card-title {
   display: inline-flex;
   align-items: center;
+  flex: 1 1 auto;
   font-weight: 600;
   color: var(--text-strong);
   font-size: 13px;
@@ -1217,6 +1027,70 @@
   white-space: nowrap;
 }
 
+/* 私有/共享 capsule + hover-revealed toggle in the card foot. Mirrors the
+   project-card角标: 小圆角胶囊, 共享=蓝(accent), 私有=灰. */
+.plugins-home__visibility {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  height: 18px;
+  padding: 0 7px 0 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.plugins-home__visibility--shared {
+  border-color: color-mix(in srgb, var(--accent) 34%, transparent);
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+.plugins-home__visibility--private {
+  border-color: var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-faint);
+}
+
+/* Compact inline toggle, revealed on card hover so the resting foot stays clean. */
+.plugins-home__visibility-toggle {
+  appearance: none;
+  display: none;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 120ms var(--ease-out), color 120ms var(--ease-out),
+    background-color 120ms var(--ease-out);
+}
+.plugins-home__card:hover .plugins-home__visibility-toggle,
+.plugins-home__card:focus-within .plugins-home__visibility-toggle {
+  display: inline-flex;
+}
+.plugins-home__visibility-toggle:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+.plugins-home__visibility-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 /* Card action buttons — overlay variant */
 .plugins-home__action {
   appearance: none;
@@ -1226,7 +1100,7 @@
   gap: 5px;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 120ms var(--ease-out), border-color 120ms var(--ease-out),
@@ -1314,8 +1188,8 @@ button.plugins-home__use-menu-item:focus-visible {
   background: rgba(255, 255, 255, 0.14);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.32);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(var(--material-thin-blur));
+  backdrop-filter: blur(var(--material-thin-blur));
 }
 .plugins-home__action--secondary:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.24);
@@ -1325,41 +1199,12 @@ button.plugins-home__use-menu-item:focus-visible {
   opacity: 0.55;
   cursor: progress;
 }
-.plugins-home__gallery-actions .plugins-home__action--primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg-panel);
-}
-.plugins-home__gallery-actions .plugins-home__action--primary:hover:not(:disabled),
-.plugins-home__gallery-actions .plugins-home__action--primary:focus-visible {
-  background: color-mix(in srgb, var(--accent) 88%, #fff);
-  border-color: color-mix(in srgb, var(--accent) 88%, #fff);
-  color: var(--bg-panel);
-}
-.plugins-home__gallery-actions .plugins-home__action--secondary {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(17, 17, 17, 0.12);
-  color: #111;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.plugins-home__gallery-actions .plugins-home__action--secondary:hover:not(:disabled),
-.plugins-home__gallery-actions .plugins-home__action--secondary:focus-visible {
-  background: #fff;
-  border-color: rgba(17, 17, 17, 0.18);
-  color: #111;
-}
 
 /* Touch/coarse-pointer fallback — overlays should be visible
    without hover so phone/tablet users can still see metadata. */
 @media (hover: none) {
   .plugins-home__card-overlay {
     opacity: 1;
-    pointer-events: auto;
-  }
-  .plugins-home__gallery-actions {
-    opacity: 1;
-    transform: translateY(0);
     pointer-events: auto;
   }
 }

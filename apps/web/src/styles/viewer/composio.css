@@ -159,7 +159,7 @@
 }
 .deploy-result-block.protected,
 .deploy-result-block.failed {
-  border-color: color-mix(in srgb, #c96442 38%, var(--border));
+  border-color: color-mix(in srgb, #87ea5c 38%, var(--border));
 }
 .deploy-result-summary {
   display: flex;
@@ -188,7 +188,7 @@
   min-height: 24px;
   padding: 0 9px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -210,8 +210,8 @@
 .deploy-result-link-state.protected,
 .deploy-result-link-state.failed {
   color: #a34828;
-  background: color-mix(in srgb, #c96442 14%, transparent);
-  border: 1px solid color-mix(in srgb, #c96442 30%, var(--border));
+  background: color-mix(in srgb, #87ea5c 14%, transparent);
+  border: 1px solid color-mix(in srgb, #87ea5c 30%, var(--border));
 }
 .deploy-result-label {
   font-size: 12px;
@@ -370,18 +370,12 @@
   align-items: center;
   padding: 6px 12px;
   font-size: 12px;
-  background: var(--bg-elevated);
-  color: var(--text);
-  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background var(--dur-quick) var(--ease-out);
 }
-.present-exit:hover { background: var(--bg-muted); }
-.present-exit:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
+.present-exit:hover { background: white; }
 
 /* Picker (legacy in some surfaces) */
 .picker {
@@ -394,7 +388,7 @@
   border-radius: var(--radius-sm);
 }
 .picker-label {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
@@ -436,7 +430,7 @@
   display: flex; align-items: center; gap: 10px; min-width: 0;
 }
 .preview-actions { display: flex; gap: 8px; align-items: center; }
-.preview-actions .muted { font-size: 11px; }
+.preview-actions .muted { font-size: 12px; }
 .preview-actions button { padding: 4px 10px; font-size: 12px; }
 .preview-body { flex: 1; min-height: 0; position: relative; }
 .preview-body iframe {
@@ -507,15 +501,17 @@
   border-radius: var(--radius);
   background: var(--bg-subtle);
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .conv-menu {
   position: fixed;
   width: 320px;
   max-height: 420px;
   overflow-y: auto;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--glass-regular);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--material-separator);
   border-radius: var(--radius);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   z-index: 200;
@@ -528,12 +524,12 @@
   padding: 4px 6px 8px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.conv-add-btn { padding: 2px 8px; font-size: 11px; }
+.conv-add-btn { padding: 2px 8px; font-size: 12px; }
 .conv-menu-empty {
   padding: 16px 8px;
   font-size: 12px;
@@ -568,7 +564,7 @@
   white-space: nowrap;
 }
 .conv-item-meta {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 .conv-item-del {
@@ -621,12 +617,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.system-reminder-chev { color: var(--text-muted); font-size: 10px; }
+.system-reminder-chev { color: var(--text-muted); font-size: 12px; }
 .system-reminder-body {
   margin: 0;
   padding: 0 12px 10px 12px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--text-muted);
   white-space: pre-wrap;
@@ -669,7 +665,7 @@
   min-width: 0;
   max-width: 100%;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   background: var(--bg-panel);
   padding: 1px 6px;
   border-radius: var(--radius-xs);
@@ -679,7 +675,7 @@
 }
 .op-waiting-hint {
   flex-basis: 100%;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-soft);
   font-style: italic;
 }
@@ -698,13 +694,13 @@
 .op-todo .op-title {
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-strong);
 }
 .op-todo .op-meta {
   margin-left: 0;
   font-variant-numeric: tabular-nums;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-strong);
 }
 
@@ -804,6 +800,10 @@
   display: inline-flex;
   align-items: center;
   margin: 6px 10px 6px 0;
+  padding: 2px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--green-border);
   padding: 2px 10px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
@@ -829,6 +829,8 @@
   flex: 1;
 }
 .op-todo-chev {
+  margin-left: 4px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -895,7 +897,7 @@
   line-height: 1.45;
 }
 .question-form-pill {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 3px 8px;
@@ -945,7 +947,7 @@
   line-height: 1.2;
 }
 .qf-help {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: -2px;
   word-wrap: break-word;
@@ -989,8 +991,8 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 }
 .qf-chip-desc {
   color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 400;
+  font-size: 12px;
+  font-weight: 500;
 }
 .qf-chip-on .qf-chip-desc {
   color: inherit;
@@ -1003,8 +1005,8 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 }
 .qf-chip-disabled:hover { border-color: var(--border); }
 .qf-chip-on {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--bg-subtle) 45%, var(--bg-panel));
   color: var(--accent-hover);
   font-weight: 500;
 }
@@ -1149,6 +1151,13 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 .question-form-locked .qf-switch {
   cursor: not-allowed;
 }
+/* Quiet neutral focus for form fields: the global --selected focus border is
+   near-black and reads like the chosen-chip state sitting right above. */
+.qf-input:focus,
+.qf-select:focus,
+.qf-textarea:focus {
+  border-color: var(--border-strong);
+}
 .question-form-foot {
   display: flex;
   align-items: center;
@@ -1160,7 +1169,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 .qf-hint,
 .qf-locked-note {
   flex: 1;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   line-height: 1.4;
 }
@@ -1208,9 +1217,9 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 .qf-card:hover { border-color: var(--border-strong); }
 .qf-card:active { transform: translateY(1px); }
 .qf-card-on {
-  border-color: var(--accent, #c96442);
-  background: color-mix(in oklch, var(--accent, #c96442) 4%, var(--bg));
-  box-shadow: 0 0 0 1px var(--accent, #c96442) inset;
+  border-color: var(--accent, #87ea5c);
+  background: color-mix(in oklch, var(--accent, #87ea5c) 4%, var(--bg));
+  box-shadow: 0 0 0 1px var(--accent, #87ea5c) inset;
 }
 .qf-card-disabled { cursor: not-allowed; opacity: 0.6; }
 .qf-card-head {
@@ -1228,11 +1237,11 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 }
 .qf-card-pill {
   font-family: ui-monospace, 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 2px 6px;
-  background: var(--accent, #c96442);
+  background: var(--accent, #87ea5c);
   color: #fff;
   border-radius: var(--radius-pill);
   flex-shrink: 0;
@@ -1280,13 +1289,13 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 }
 .qf-card-refs {
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   line-height: 1.4;
 }
 .qf-card-refs-label {
   font-family: ui-monospace, 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -1779,297 +1788,6 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   opacity: 1;
   transform: translateY(0);
 }
-/* Inspiration picker — the mid-task reference-grounding step behind the
-   `inspiration` question type. Shares the question-form language: qf-chip
-   category tabs, qf-card selection accents, the qf-visual dialog gallery,
-   and the qf-preview skeleton art for template thumbnails. */
-.qf-insp {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 4px;
-}
-.qf-insp-query {
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-style: italic;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.qf-insp-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-}
-.qf-insp-tab {
-  position: relative;
-  display: inline-flex;
-  min-height: 32px;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border: 0;
-  background: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-  transition: color 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-insp-tab::after {
-  position: absolute;
-  right: 6px;
-  bottom: -1px;
-  left: 6px;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: transparent;
-  content: '';
-}
-.qf-insp-tab:hover {
-  color: var(--text);
-}
-.qf-insp-tab-active {
-  color: var(--text);
-}
-.qf-insp-tab-active::after {
-  background: var(--accent);
-}
-.qf-insp-tab-count {
-  display: grid;
-  min-width: 16px;
-  height: 16px;
-  place-items: center;
-  padding: 0 4px;
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.qf-insp-cats {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
-}
-.qf-insp-cats::-webkit-scrollbar {
-  display: none;
-}
-.qf-insp-cat {
-  flex: 0 0 auto;
-}
-.qf-insp-grid {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-}
-.qf-insp-grid-gallery {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.qf-insp-card {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 6px;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
-  cursor: pointer;
-  transition:
-    border-color 140ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-insp-card input {
-  display: none;
-}
-.qf-insp-card:hover {
-  border-color: var(--border-strong);
-}
-.qf-insp-card:active {
-  transform: translateY(1px);
-}
-.qf-insp-card-on {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent) inset;
-}
-.qf-insp-card-disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-.qf-insp-card-disabled:hover,
-.qf-insp-card-disabled:active {
-  border-color: var(--border);
-  transform: none;
-}
-.qf-insp-thumb {
-  --visual-bg: #eef0ed;
-  --visual-surface: #ffffff;
-  --visual-ink: #20231f;
-  --visual-muted: #9da39a;
-  --visual-accent: #58695b;
-  position: relative;
-  display: block;
-  overflow: hidden;
-  aspect-ratio: 16 / 10;
-  border-radius: 6px;
-  background: var(--visual-bg);
-  padding: 6px 6px 0;
-}
-.qf-insp-thumb .qf-preview-app-body {
-  grid-template-columns: 1fr;
-}
-.qf-insp-card-check {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 2;
-  display: grid;
-  width: 19px;
-  height: 19px;
-  place-items: center;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: white;
-}
-.qf-insp-card-name {
-  overflow: hidden;
-  color: var(--text);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.qf-insp-card-meta {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  color: var(--text-muted);
-  font-size: 10px;
-  -webkit-line-clamp: 2;
-  line-height: 1.35;
-}
-.qf-insp-swatches {
-  height: 26px;
-}
-.qf-insp-swatches-empty .qf-card-swatch {
-  background: var(--bg-subtle);
-}
-.qf-insp-more {
-  display: grid;
-  min-height: 0;
-  place-items: center;
-  border: 1px dashed var(--border-strong);
-  border-radius: 10px;
-  color: var(--text-muted);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.qf-insp-status {
-  padding: 10px 2px;
-  color: var(--text-muted);
-  font-size: 12px;
-}
-.qf-insp-upload {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.qf-insp-dropzone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 16px 12px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 10px;
-  background: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition:
-    border-color 140ms cubic-bezier(0.23, 1, 0.32, 1),
-    background 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-insp-dropzone:hover:not(:disabled),
-.qf-insp-dropzone-over {
-  border-color: var(--accent);
-  background: color-mix(in oklch, var(--accent) 4%, transparent);
-  color: var(--text);
-}
-.qf-insp-dropzone:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-.qf-insp-dropzone-cta {
-  font-size: 12px;
-  font-weight: 600;
-}
-.qf-insp-dropzone-limit {
-  font-size: 10px;
-}
-.qf-insp-upload-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.qf-insp-upload-item {
-  position: relative;
-  width: 84px;
-  margin: 0;
-}
-.qf-insp-upload-item img {
-  display: block;
-  width: 84px;
-  height: 60px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  object-fit: cover;
-}
-.qf-insp-upload-item figcaption {
-  overflow: hidden;
-  margin-top: 2px;
-  color: var(--text-muted);
-  font-size: 9px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.qf-insp-upload-remove {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  display: grid;
-  width: 16px;
-  height: 16px;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  background: var(--bg);
-  color: var(--text-muted);
-  cursor: pointer;
-}
-.qf-insp-upload-remove:hover {
-  color: var(--text);
-}
-.qf-insp-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.4;
-}
-.qf-insp-hint svg {
-  flex: 0 0 auto;
-}
 .question-form-summary {
   display: flex;
   align-items: flex-start;
@@ -2295,12 +2013,12 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   padding: 16px 18px;
 }
 .questions-panel-body .question-form-title {
-  font-size: 15px;
+  font-size: 16px;
 }
 .questions-panel-body .question-form-icon {
   width: 30px;
   height: 30px;
-  font-size: 15px;
+  font-size: 16px;
 }
 .questions-panel-foot {
   display: flex;
@@ -2402,7 +2120,8 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   inset: 0;
   z-index: 1700;
   background: rgba(28, 27, 26, 0.42);
-  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: var(--scrim-backdrop);
+  backdrop-filter: var(--scrim-backdrop);
   -webkit-app-region: no-drag;
   display: flex;
   align-items: stretch;
@@ -2472,7 +2191,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   color: var(--text-strong, var(--text));
 }
 .ds-modal-subtitle {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.55;
   /* Clamp to two lines so a long brief stays readable without growing
@@ -2503,7 +2222,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   border: none;
   border-radius: var(--radius-pill);
   padding: 6px 16px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
@@ -2529,6 +2248,10 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 .ds-modal-actions .share-menu > button {
   white-space: nowrap;
   flex-shrink: 0;
+  /* Every header action reads as a capsule. The split primary action keeps its
+     inner corners square (see --split / -caret below) so its two halves join
+     into one pill. */
+  border-radius: var(--radius-pill);
 }
 /* Uniform control height so the accent "Use" CTA and the ghost actions (Share,
    etc.) read as one aligned row — the accent button used to sit a hair taller
@@ -2587,7 +2310,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: var(--radius-large, 8px);
   background: var(--bg-panel);
   color: var(--text-muted);
   cursor: pointer;
@@ -2596,6 +2319,13 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   transition: opacity 140ms ease, transform 140ms ease, color 140ms ease,
     background 140ms ease;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+}
+/* Force the stroke-based icon to paint with the button's color — guards against
+   any stray global svg reset that would otherwise leave the button blank. */
+.ds-modal-stage-fullscreen svg {
+  display: block;
+  stroke: currentColor;
+  fill: none;
 }
 .ds-modal-stage-iframe:hover .ds-modal-stage-fullscreen,
 .ds-modal-stage-fullscreen:focus-visible {
@@ -2804,7 +2534,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   gap: 10px;
 }
 .plugin-media-sidebar__prompt-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2815,7 +2545,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-muted);
-  font-size: 11.5px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -2907,11 +2637,11 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   align-items: center;
   gap: 6px;
   padding: 7px 16px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--accent);
   background: var(--accent);
   color: white;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -2960,6 +2690,14 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 }
 .ds-modal-primary-action-option {
   align-items: flex-start;
+  /* Reset the global `button` rule in styles/primitives.css
+     (`height: 36px; white-space: nowrap`). Each option stacks a bold label over
+     a muted description, so the fixed 36px clamped both lines into one box and
+     the description bled into the next option's label; `nowrap` also stopped a
+     long description from wrapping. Same reset as `.artifact-version-card` in
+     styles/shell.css, which is the other multi-line button in the app. */
+  height: auto;
+  white-space: normal;
 }
 .ds-modal-primary-action-option__body {
   display: flex;
@@ -2972,8 +2710,12 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   color: var(--text);
 }
 .ds-modal-primary-action-option__desc {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
+  /* Now that the option can wrap (see the height/white-space reset above), the
+     inherited `line-height: 1` from the global `button` rule would let wrapped
+     description lines touch. 1.4 matches `.artifact-version-card__summary`. */
+  line-height: 1.4;
 }
 /* Dedicated icon-button shape for the modal close affordance. Matches the
    visual language used by plugin-media-detail__close and
@@ -3041,13 +2783,13 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 }
 .design-spec-pre code { font: inherit; color: inherit; background: transparent; }
 .design-spec-line { display: inline; }
-.design-spec-line.is-h1 { color: #2563eb; font-weight: 700; }
+.design-spec-line.is-h1 { color: #1A74FF; font-weight: 700; }
 .design-spec-line.is-h2 { color: #0891b2; font-weight: 700; }
 .design-spec-line.is-h3 { color: #0d9488; font-weight: 600; }
 .design-spec-line.is-h4 { color: #16a34a; font-weight: 600; }
 .design-spec-line.is-quote { color: #6b7280; font-style: italic; }
 .design-spec-line.is-list { color: var(--text); }
-.design-spec-line.is-table { color: #7c3aed; }
+.design-spec-line.is-table { color: #353535; }
 .design-spec-line.is-fence { color: #dc2626; }
 .design-spec-line.is-blank { color: var(--text-muted); }
 .md-tk-bold { font-weight: 700; color: var(--text); }
@@ -3157,7 +2899,6 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
 .examples-search input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .examples-search .search-icon {
   position: absolute;
@@ -3176,7 +2917,7 @@ button.qf-chip-other:disabled { cursor: default; opacity: 0.6; }
   align-items: center;
 }
 .examples-filter-label {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
@@ -3221,7 +2962,7 @@ button.filter-pill.active:hover:not(:disabled) {
   color: var(--text);
 }
 .filter-pill-count {
-  font-size: 11px;
+  font-size: 12px;
   opacity: 0.7;
 }
 button.filter-pill:hover:not(:disabled) .filter-pill-count,
@@ -3265,7 +3006,7 @@ button.filter-pill:hover:not(:disabled) .filter-pill-count,
   bottom: 10px;
   right: 10px;
   padding: 5px 12px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
   color: white;
   background: rgba(28, 27, 26, 0.78);
@@ -3335,7 +3076,7 @@ button.filter-pill:hover:not(:disabled) .filter-pill-count,
   padding: 48px 12px;
   color: var(--text-muted);
 }
-.centered-loader-label { font-size: 12.5px; letter-spacing: 0.01em; }
+.centered-loader-label { font-size: 13px; letter-spacing: 0.01em; }
 
 /* ============================================================
    Resizable entry sidebar
@@ -3376,8 +3117,10 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   bottom: calc(100% + 6px);
   left: 0;
   min-width: 240px;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--glass-regular);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--material-separator);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 6px;
@@ -3397,7 +3140,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: not-allowed;
-  font-size: 12.5px;
+  font-size: 13px;
   text-align: left;
   width: 100%;
 }
@@ -3415,7 +3158,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 }
 .composer-import-item-label { flex: 1; }
 .composer-import-item-soon {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -3445,7 +3188,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   min-width: 14px;
   height: 14px;
   padding: 0 3px;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0;
   background: var(--accent);
@@ -3459,18 +3202,28 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 .chat-history-menu {
   position: absolute;
   top: calc(100% + 6px);
-  left: 12px;
+  /* Right-anchored to the conversations icon: the sticky .chat-project-header
+     is the containing block and pads 12px, and the icon is its last (and
+     right-most) child — so right:12px lands the menu's right edge exactly on
+     the icon's. This is also what `transform-origin: top right` below already
+     assumed. Width stays 80% of the header's inner span, growing leftward. */
+  left: auto;
   right: 12px;
-  width: auto;
+  width: calc((100% - 24px) * 0.8);
   max-height: min(360px, calc(100vh - 160px));
   display: flex;
   flex-direction: column;
-  background: color-mix(in srgb, var(--bg-panel) 96%, var(--bg));
-  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-  border-radius: var(--radius);
+  /* Solid panel, not glass: this menu lives inside .chat-project-header,
+     whose own backdrop-filter makes it a backdrop root — a descendant's
+     backdrop-filter cannot sample the chat content behind the header, so a
+     translucent fill just lets un-blurred text bleed through. Solid matches
+     the app's other anchored menus (working-dir picker, plus menu). */
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft, var(--border));
+  border-radius: var(--radius-lg);
   box-shadow:
-    0 18px 48px color-mix(in srgb, #000 12%, transparent),
-    0 1px 0 color-mix(in srgb, #fff 42%, transparent) inset;
+    0 1px 2px color-mix(in srgb, #000 4%, transparent),
+    0 12px 32px -12px color-mix(in srgb, #000 22%, transparent);
   z-index: 30;
   overflow: hidden;
   transform-origin: top right;
@@ -3480,12 +3233,13 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 8px 5px;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  background: color-mix(in srgb, var(--bg-panel) 92%, var(--bg));
+  /* No divider, no tinted band — the header shares one continuous surface
+     with the search field and list so the popover reads as a single clean
+     sheet, matching the app's other anchored menus. */
+  padding: 8px 8px 4px;
 }
 .chat-history-menu-title {
-  font-size: 10.5px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
@@ -3493,7 +3247,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 }
 .chat-history-menu-count {
   color: var(--text-faint);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1;
   margin-left: 6px;
@@ -3505,9 +3259,12 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   display: flex;
   align-items: center;
   gap: 5px;
-  height: 28px;
+  /* Matches the app's standard control height (primitives.css `button`); at
+     28px this field read as a cramped slot against the list rows below it.
+     The inner input stays 20px and is centered by `align-items`. */
+  height: 36px;
   margin: 6px 8px 3px;
-  padding: 0 7px;
+  padding: 0 9px;
   border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--bg) 88%, var(--bg-panel));
@@ -3523,7 +3280,6 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 }
 .chat-history-search:focus-within {
   border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .chat-history-search svg {
   width: 11px;
@@ -3538,7 +3294,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   outline: none;
   background: transparent;
   color: var(--text);
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 20px;
 }
 .chat-history-search input::placeholder { color: var(--text-faint); }
@@ -3568,7 +3324,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   margin-left: auto;
   height: 22px;
   padding: 0 7px;
-  font-size: 10.5px;
+  font-size: 12px;
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--bg-subtle) 84%, transparent);
   border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
@@ -3613,7 +3369,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 }
 .chat-history-empty {
   padding: 14px 8px;
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-muted);
   text-align: center;
   font-style: italic;
@@ -3623,7 +3379,9 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   align-items: center;
   gap: 6px;
   min-height: 32px;
-  padding: 4px 7px;
+  /* Roomier left inset so the title has breathing room from the card edge;
+     right keeps room for the hover delete button. */
+  padding: 4px 6px 4px 12px;
   border-radius: var(--radius);
   background: transparent;
   border: 1px solid transparent;
@@ -3652,6 +3410,12 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 }
 .chat-conv-item-name {
   flex: 1;
+  /* This is a <button>, and the global `button` rule makes it an inline-flex
+     box with `justify-content: center` — which centers short titles like
+     "未命名对话". Left-align the content so all rows read flush-left (long
+     titles already fill the width so they looked left-aligned regardless). */
+  justify-content: flex-start;
+  text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3664,7 +3428,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   align-items: center;
   gap: 5px;
   flex: 0 0 auto;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1;
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
@@ -3719,8 +3483,10 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   gap: 6px;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background: var(--bg-panel);
-  border: 1px solid var(--border-strong);
+  /* Surface comes from .od-glass-refract (frosted base, SDF refraction on
+     Chromium via useLiquidGlass in ChatPane); the white→transparent wash is
+     layered on top via the higher-specificity rule below. */
+  border: 1px solid var(--material-separator);
   color: var(--text);
   font-size: 12px;
   box-shadow: var(--shadow-sm);
@@ -3742,6 +3508,23 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
     opacity 140ms cubic-bezier(0.23, 1, 0.32, 1),
     transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
     visibility 0s linear 140ms;
+}
+/* The pill sits directly over the scrolling transcript, so its surface has to
+   be opaque enough to read against arbitrary message text. The previous wash
+   faded to fully transparent at the bottom, which let chat copy show straight
+   through the label ("回到最新" appeared to have text baked into it) and made
+   the pill look half-erased. It also hardcoded a white fill, so in dark theme
+   a white pill carried light `var(--text)` copy and became unreadable.
+   Keep the top-to-bottom fade — it is what makes the pill feel like it belongs
+   to the composer below — but floor it at an opacity that still occludes, and
+   source the colour from the theme surface. */
+.chat-jump-btn.od-glass-refract,
+.chat-jump-btn.od-glass-refract[data-od-glass-sdf] {
+  background: linear-gradient(
+    180deg,
+    var(--bg-panel) 0%,
+    color-mix(in srgb, var(--bg-panel) 88%, transparent) 100%
+  );
 }
 .chat-jump-btn-active {
   opacity: 1;
@@ -3772,7 +3555,7 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   background: none;
   border: none;
   border-radius: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
   width: fit-content;
   opacity: 0;
@@ -3780,7 +3563,8 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 }
 .msg.assistant:hover .assistant-footer,
 .msg.assistant:focus-within .assistant-footer,
-.assistant-footer[data-streaming="true"] { opacity: 1; }
+.assistant-footer[data-streaming="true"],
+.assistant-footer[data-last="true"] { opacity: 1; }
 @media (hover: none) {
   .assistant-footer { opacity: 1; }
 }
@@ -3795,9 +3579,14 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
   animation: pulse 1.2s ease-in-out infinite;
 }
 .assistant-footer .assistant-label {
-  font-weight: 400;
+  font-weight: 500;
   color: var(--text-faint);
-  font-size: 11px;
+  font-size: 12px;
+}
+.assistant-footer .assistant-stats {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  font-size: 12px;
 }
 .assistant-footer[data-unfinished="true"] {
   background: none;
@@ -3827,523 +3616,4 @@ body.entry-resizing { cursor: col-resize; user-select: none; }
 .assistant-action-btn:hover {
   color: var(--text);
   background: var(--bg-subtle);
-}
-
-/* ---- Inspiration picker: live document thumbs + design-system gallery ----
-   Owned by InspirationPicker.tsx. `.qf-insp-thumb-live` embeds a real
-   document (template seed / compact brand card) scaled into the thumb; the
-   6.25 factor is the inverse of scale(0.16) so the iframe fills the box
-   exactly at any card size. */
-.qf-insp-thumb-live {
-  padding: 0;
-}
-.qf-insp-thumb-live iframe {
-  width: 625%;
-  height: 625%;
-  transform: scale(0.16);
-  transform-origin: 0 0;
-  border: 0;
-  display: block;
-  pointer-events: none;
-  background: #fff;
-}
-.qf-dsx-thumb {
-  aspect-ratio: 16 / 11;
-}
-.qf-dsx-fallback {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  gap: 3px;
-  padding: 8px;
-  align-items: stretch;
-}
-.qf-dsx-fallback .qf-card-swatch {
-  flex: 1;
-  border-radius: 4px;
-  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
-}
-
-/* Design-system gallery dialog (the "+N" browse-all surface). */
-.qf-dsx-dialog {
-  width: min(980px, 94vw);
-}
-.qf-dsx-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0 12px;
-  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
-  flex-wrap: wrap;
-}
-.qf-dsx-toolbar-spacer {
-  flex: 1;
-}
-.qf-dsx-search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.14));
-  border-radius: 8px;
-  background: var(--bg, #fff);
-  min-width: 220px;
-  color: var(--text-muted, #6b6f66);
-}
-.qf-dsx-search input {
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-size: 13px;
-  color: var(--text, #20231f);
-  width: 100%;
-}
-.qf-dsx-tool {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-muted, #6b6f66);
-  cursor: pointer;
-}
-.qf-dsx-tool:hover:not(:disabled) {
-  background: var(--bg-subtle, rgba(0, 0, 0, 0.05));
-  color: var(--text, #20231f);
-}
-.qf-dsx-tool:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-.qf-dsx-tool-on {
-  border-color: var(--accent, #58695b);
-  color: var(--accent, #58695b);
-  background: color-mix(in srgb, var(--accent, #58695b) 8%, transparent);
-}
-.qf-dsx-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: 16px;
-  padding-top: 12px;
-  min-height: 0;
-  flex: 1;
-}
-.qf-dsx-list {
-  overflow-y: auto;
-  min-height: 0;
-  padding-right: 4px;
-}
-.qf-dsx-section {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-muted, #8a8f84);
-  margin: 10px 0 8px;
-}
-.qf-dsx-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 6px;
-}
-.qf-dsx-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  text-align: start;
-  padding: 8px 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text, #20231f);
-}
-.qf-dsx-row:hover {
-  background: var(--bg-subtle, rgba(0, 0, 0, 0.05));
-}
-.qf-dsx-row-on {
-  background: color-mix(in srgb, var(--accent, #58695b) 10%, transparent);
-}
-.qf-dsx-row-avatar {
-  display: inline-flex;
-  gap: 2px;
-  width: 34px;
-  height: 22px;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
-}
-.qf-dsx-row-avatar i {
-  flex: 1;
-}
-.qf-dsx-row-title {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.qf-dsx-preview {
-  overflow: hidden;
-  min-height: 0;
-  border-inline-start: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
-  padding-inline-start: 16px;
-}
-.qf-dsx-preview-frame {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 360px;
-  border: 0;
-  border-radius: 10px;
-  background: #fff;
-}
-@media (max-width: 760px) {
-  .qf-dsx-body {
-    grid-template-columns: 1fr;
-  }
-  .qf-dsx-preview {
-    display: none;
-  }
-}
-
-/* DS cards are authored in viewport units (renderDesignSystemCard), so they
-   embed natively at the thumb's own size — no scale trick needed. */
-.qf-dsx-thumb.qf-insp-thumb-live iframe {
-  width: 100%;
-  height: 100%;
-  transform: none;
-}
-
-/* Selected-reference chips: gallery picks aren't visible in the inline
-   grid, so the picker lists every current pick as a removable chip. */
-.qf-insp-picked {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 2px 0 4px;
-}
-.qf-insp-pick {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  max-width: 100%;
-  padding: 4px 6px 4px 8px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent, #58695b) 35%, transparent);
-  background: color-mix(in srgb, var(--accent, #58695b) 8%, transparent);
-  color: var(--text, #20231f);
-  font-size: 11.5px;
-  line-height: 1.2;
-}
-.qf-insp-pick-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 220px;
-}
-.qf-insp-pick-remove {
-  display: grid;
-  place-items: center;
-  width: 15px;
-  height: 15px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-muted, #6b6f66);
-  cursor: pointer;
-  padding: 0;
-}
-.qf-insp-pick-remove:hover {
-  background: var(--bg-subtle, rgba(0, 0, 0, 0.08));
-  color: var(--text, #20231f);
-}
-
-/* Browse-all gallery chrome, shared by the template and design-system tabs.
-   Search and category chips live OUTSIDE the scroll container — they used to
-   be a sticky header inside it, which left the grid visibly sliding through
-   the band between the dialog title and the chips. Only the grid scrolls now,
-   so there is nothing to bleed through. `qf-gal-dialog` carries the chrome;
-   the per-tab classes carry only their width. */
-.qf-gal-dialog {
-  max-height: min(660px, calc(100vh - 56px));
-}
-.qf-tplx-dialog {
-  width: min(700px, calc(100vw - 40px));
-}
-/* Three classes deep: these override the sectioned-dialog padding that ships
-   from the Dialog CSS module, whose injection order is bundler-owned. */
-.qf-visual-dialog.qf-gal-dialog .qf-visual-dialog-head {
-  gap: 10px;
-  padding: 14px 16px 10px;
-}
-.qf-visual-dialog.qf-gal-dialog .qf-visual-dialog-title {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-}
-.qf-tplx-bar {
-  flex: 0 0 auto;
-  padding: 0 16px 10px;
-  border-bottom: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
-}
-.qf-tplx-bar .qf-insp-cats {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.qf-visual-dialog.qf-gal-dialog .qf-visual-dialog-body {
-  padding: 12px 16px 0;
-  gap: 8px;
-}
-.qf-visual-dialog.qf-gal-dialog .qf-visual-dialog-foot {
-  margin-top: 10px;
-  padding: 10px 16px 12px;
-}
-
-/* Header tool cluster: the collapsible search sits beside the close icon. */
-.qf-visual-dialog-head-tools {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 2px;
-}
-
-/* Collapsed, the search is just an icon. Opening animates the field's grid
-   track from 0fr to 1fr (the repo's auto-size disclosure pattern, on the
-   inline axis) so there is no magic max-width to keep in sync. */
-.qf-tplx-search {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  height: 28px;
-  padding: 0 2px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill, 999px);
-  background: transparent;
-  color: var(--text-muted, #6b6f66);
-  transition:
-    background 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    border-color 200ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-tplx-search.is-open {
-  border-color: var(--border, rgba(0, 0, 0, 0.14));
-  background: var(--bg, #fff);
-}
-.qf-tplx-search-toggle,
-.qf-tplx-search-clear {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  transition: background 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-tplx-search-toggle:hover,
-.qf-tplx-search-clear:hover {
-  background: var(--bg-subtle, rgba(0, 0, 0, 0.06));
-  color: var(--text, #20231f);
-}
-/* Width, not the 0fr/1fr grid trick used for vertical disclosure: `fr` only
-   distributes *free* space, and this field is a content-sized flex item with
-   none, so a 0fr track resolves straight back to the input's own width and
-   the collapsed search keeps pushing the close icon away. The input has a
-   fixed width anyway, so there is no intrinsic size to preserve here. */
-.qf-tplx-search-field {
-  overflow: hidden;
-  max-width: 0;
-  transition: max-width 200ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-tplx-search.is-open .qf-tplx-search-field {
-  max-width: 168px;
-}
-.qf-tplx-search-field > input {
-  width: 150px;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--text, #20231f);
-  font-size: 12.5px;
-  opacity: 0;
-  transition: opacity 140ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-.qf-tplx-search.is-open .qf-tplx-search-field > input {
-  opacity: 1;
-  transition-duration: 200ms;
-}
-
-/* Dialog close affordance is an icon, not a bordered button. */
-.qf-visual-dialog-close,
-.qf-visual-dialog-close:hover {
-  border: 0;
-  box-shadow: none;
-}
-.qf-visual-dialog.qf-gal-dialog .qf-visual-dialog-close {
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  min-height: 28px;
-  padding: 0;
-  border-radius: 50%;
-}
-
-/* Inspiration-source shortcuts under the upload dropzone: open a reference
-   site in the built-in Browser, copy an image there, paste it back here. */
-.qf-insp-sources {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-.qf-insp-sources-label {
-  font-size: 11px;
-  color: var(--text-muted, #8a8f84);
-  margin-inline-end: 2px;
-}
-.qf-insp-source {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border, rgba(0, 0, 0, 0.14));
-  background: var(--bg, #fff);
-  color: var(--text, #20231f);
-  font-size: 11.5px;
-  cursor: pointer;
-}
-.qf-insp-source:hover {
-  border-color: var(--accent, #58695b);
-  color: var(--accent, #58695b);
-}
-.qf-insp-source-tip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--accent, #58695b) 8%, transparent);
-  color: var(--text, #20231f);
-  font-size: 11.5px;
-  line-height: 1.4;
-}
-
-/* "Selected" section at the bottom of the picker: picks render with the
-   same card treatment as the catalog (cover / title / category) plus a
-   remove button, so gallery picks stay fully visible. */
-.qf-insp-picked-section {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border-subtle, rgba(0, 0, 0, 0.12));
-}
-.qf-insp-picked-label {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-muted, #8a8f84);
-  margin-bottom: 8px;
-}
-.qf-insp-card-picked {
-  position: relative;
-  cursor: default;
-}
-.qf-insp-card-remove {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--text, #20231f) 72%, transparent);
-  color: #fff;
-  cursor: pointer;
-  padding: 0;
-}
-.qf-insp-card-remove:hover {
-  background: var(--text, #20231f);
-}
-.qf-insp-thumb-img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted, #9da39a);
-  padding: 0;
-}
-.qf-insp-thumb-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Detail preview: an eye button on every card opens the full document. */
-.qf-insp-card-eye {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--text, #20231f) 60%, transparent);
-  color: #fff;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-.qf-insp-card:hover .qf-insp-card-eye,
-.qf-insp-card-eye:focus-visible {
-  opacity: 1;
-}
-.qf-insp-detail-dialog {
-  width: min(1040px, 94vw);
-}
-.qf-insp-detail-body {
-  display: flex;
-  min-height: 0;
-}
-.qf-insp-detail-frame {
-  width: 100%;
-  height: min(72vh, 760px);
-  border: 0;
-  border-radius: 8px;
-  background: #fff;
-}
-.qf-insp-detail-image {
-  max-width: 100%;
-  max-height: min(72vh, 760px);
-  margin: 0 auto;
-  border-radius: 8px;
-  object-fit: contain;
-}
-
-/* Broken/renamed upload image in the locked summary: the <img> hides itself
-   and the box falls back to a neutral image glyph via a mask-free glyph. */
-.qf-insp-thumb-img-broken::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--bg-subtle, #eef0ed);
 }

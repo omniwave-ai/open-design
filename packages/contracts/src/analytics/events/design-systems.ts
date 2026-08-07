@@ -3,6 +3,7 @@
  * Design-system analytics enums and lifecycle result prop types.
  */
 import type { TrackingProjectKind } from './shared-enums.js';
+import type { TrackingWorkspaceScope } from './workspace.js';
 // --- Design systems page_view (multi-surface) ---
 //
 // Single shape covering the dedicated DS list / create / preview pages plus
@@ -40,8 +41,6 @@ export type TrackingDesignSystemsEntryFrom =
   | 'project_canvas'
   // Created from the Library surface.
   | 'library'
-  // Entered from the inspiration picker's design-system gallery.
-  | 'inspiration_picker'
   | 'unknown';
 
 // Origin of the design system itself. NOT the same field as
@@ -183,8 +182,6 @@ export type TrackingDesignSystemCreateEntryFrom =
   | 'project_canvas'
   // Created from the Library surface.
   | 'library'
-  // Created from the inspiration picker's design-system gallery.
-  | 'inspiration_picker'
   | 'unknown';
 
 export type TrackingDesignSystemSourceIngestEntryFrom =
@@ -354,6 +351,7 @@ export interface DesignSystemStatusResultProps {
   is_default_after: boolean;
   error_code?: string;
   duration_ms: number;
+  resource_scope?: TrackingWorkspaceScope;
 }
 
 export interface DesignSystemApplyResultProps {
@@ -398,4 +396,3 @@ export interface DesignSystemEnrichResultProps {
   error_code?: string;
   duration_ms?: number;
 }
-

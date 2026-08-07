@@ -43,6 +43,7 @@ const createConversation = vi.fn();
 const patchConversation = vi.fn();
 const patchProject = vi.fn();
 const patchPreviewCommentStatus = vi.fn();
+const upsertPreviewComment = vi.fn();
 const saveTabs = vi.fn();
 const writeProjectTextFile = vi.fn();
 const fetchProjectFileText = vi.fn();
@@ -145,7 +146,7 @@ vi.mock('../../src/providers/registry', () => ({
   fetchProjectFileText: (...args: unknown[]) => fetchProjectFileText(...args),
   fetchSkill: (...args: unknown[]) => fetchSkill(...args),
   patchPreviewCommentStatus: (...args: unknown[]) => patchPreviewCommentStatus(...args),
-  upsertPreviewComment: vi.fn(),
+  upsertPreviewComment: (...args: unknown[]) => upsertPreviewComment(...args),
   writeProjectTextFile: (...args: unknown[]) => writeProjectTextFile(...args),
 }));
 
@@ -232,6 +233,18 @@ async function waitForReadyChatPaneProps() {
     onSend?: (prompt: string, attachments: unknown[], comments: unknown[]) => Promise<void>;
     initialDraft?: string;
   };
+}
+
+async function advanceTestClock(ms: number): Promise<void> {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms);
+  });
+}
+
+async function settleTestClock(): Promise<void> {
+  for (let step = 0; step < 3; step += 1) {
+    await advanceTestClock(0);
+  }
 }
 
 describe('terminal replay artifact recovery', () => {
@@ -492,6 +505,72 @@ describe('ProjectView daemon cleanup', () => {
     vi.useRealTimers();
     globalThis.fetch = originalFetch;
     window.sessionStorage.clear();
+  });
+
+  it('uses the routed conversation as the comment anchor while conversations hydrate', async () => {
+    listConversations.mockReturnValue(new Promise(() => {}));
+    listMessages.mockResolvedValue([]);
+    fetchPreviewComments.mockResolvedValue([]);
+    loadTabs.mockResolvedValue({ tabs: [], activeTabId: null });
+    fetchProjectFiles.mockResolvedValue([]);
+    fetchLiveArtifacts.mockResolvedValue([]);
+    fetchSkill.mockResolvedValue(null);
+    fetchDesignSystem.mockResolvedValue(null);
+    getTemplate.mockResolvedValue(null);
+    listActiveChatRuns.mockResolvedValue([]);
+    upsertPreviewComment.mockResolvedValue({
+      id: 'comment-1',
+      projectId: 'project-comment-route',
+      conversationId: 'conv-route',
+      note: 'Member QA comment',
+      target: { kind: 'point', x: 10, y: 20 },
+      createdAt: 1,
+      updatedAt: 1,
+    });
+
+    render(
+      <ProjectView
+        project={{ id: 'project-comment-route', name: 'Project', skillId: null, designSystemId: null } as never}
+        routeFileName={null}
+        routeConversationId="conv-route"
+        config={{ mode: 'daemon', agentId: 'agent-1', notifications: undefined, agentModels: {} } as never}
+        agents={[{ id: 'agent-1', name: 'OpenCode', models: [] } as never]}
+        skills={[]}
+        designTemplates={[]}
+        designSystems={[]}
+        daemonLive
+        onModeChange={() => {}}
+        onAgentChange={() => {}}
+        onAgentModelChange={() => {}}
+        onRefreshAgents={() => {}}
+        onOpenSettings={() => {}}
+        onBack={() => {}}
+        onClearPendingPrompt={() => {}}
+        onTouchProject={() => {}}
+        onProjectChange={() => {}}
+        onProjectsRefresh={() => {}}
+      />,
+    );
+
+    await waitFor(() => expect(fileWorkspaceSpy).toHaveBeenCalled());
+    const onSavePreviewComment = fileWorkspaceSpy.mock.calls.at(-1)?.[0]
+      ?.onSavePreviewComment as (
+        target: { kind: 'point'; x: number; y: number },
+        note: string,
+        attachAfterSave: boolean,
+      ) => Promise<unknown>;
+
+    await expect(onSavePreviewComment(
+      { kind: 'point', x: 10, y: 20 },
+      'Member QA comment',
+      false,
+    )).resolves.toEqual(expect.objectContaining({ id: 'comment-1' }));
+    expect(upsertPreviewComment).toHaveBeenCalledWith(
+      'project-comment-route',
+      'conv-route',
+      expect.objectContaining({ note: 'Member QA comment' }),
+      null,
+    );
   });
 
   it('does not abort daemon cancel reattach controllers during unmount cleanup', async () => {
@@ -1563,7 +1642,9 @@ describe('ProjectView daemon cleanup', () => {
       />,
     );
 
-    await waitFor(() => expect(fetchProjectDesignSystemPackageAudit).toHaveBeenCalledWith('project-ds'));
+    await waitFor(() =>
+      expect(fetchProjectDesignSystemPackageAudit).toHaveBeenCalledWith('project-ds', null),
+    );
     await waitFor(() => expect(streamViaDaemon).toHaveBeenCalled());
     expect(window.sessionStorage.getItem('od:design-system-audit-auto-repair:project-ds')).toBe('1');
     await waitFor(() => {
@@ -1653,7 +1734,9 @@ describe('ProjectView daemon cleanup', () => {
     const chatProps = await waitForReadyChatPaneProps();
     await chatProps.onSend!('Update the design system', [], []);
 
-    await waitFor(() => expect(fetchProjectDesignSystemPackageAudit).toHaveBeenCalledWith('project-ds-manual'));
+    await waitFor(() =>
+      expect(fetchProjectDesignSystemPackageAudit).toHaveBeenCalledWith('project-ds-manual', null),
+    );
     await waitFor(() => {
       expect(saveMessage.mock.calls.some((call) =>
         call[2]?.role === 'assistant'
@@ -1734,7 +1817,9 @@ describe('ProjectView daemon cleanup', () => {
       />,
     );
 
-    await waitFor(() => expect(fetchProjectDesignSystemPackageAudit).toHaveBeenCalledWith('project-ds-pass'));
+    await waitFor(() =>
+      expect(fetchProjectDesignSystemPackageAudit).toHaveBeenCalledWith('project-ds-pass', null),
+    );
     expect(streamViaDaemon).toHaveBeenCalledTimes(1);
     expect(window.sessionStorage.getItem('od:design-system-audit-auto-repair:project-ds-pass')).toBeNull();
   });
@@ -2182,7 +2267,12 @@ describe('ProjectView daemon cleanup', () => {
       />,
     );
 
-    await waitFor(() => expect(fetchProjectFiles).toHaveBeenCalledWith('project-1'));
+    await waitFor(() =>
+      expect(fetchProjectFiles).toHaveBeenCalledWith('project-1', {
+        requireAuthoritative: true,
+        workspaceContext: null,
+      }),
+    );
     expect(fetchChatRunStatus).not.toHaveBeenCalled();
     expect(reattachDaemonRun).not.toHaveBeenCalled();
     expect(saveMessage).not.toHaveBeenCalledWith(
@@ -2259,7 +2349,9 @@ describe('ProjectView daemon cleanup', () => {
       />,
     );
 
-    await waitFor(() => expect(fetchChatRunStatus).toHaveBeenCalledWith('run-legacy-replay'));
+    await waitFor(() =>
+      expect(fetchChatRunStatus).toHaveBeenCalledWith('run-legacy-replay', null),
+    );
     await waitFor(() => {
       expect(saveMessage).toHaveBeenCalledWith(
         'project-1',
@@ -2357,6 +2449,7 @@ describe('ProjectView daemon cleanup', () => {
   });
 
   it('keeps reattaching after two generic disconnects while daemon status stays running, but backs off before the next retry', async () => {
+    vi.useFakeTimers();
     const runCreatedAt = Date.now();
     const genericDisconnect = await createGenericDisconnectError();
 
@@ -2419,16 +2512,15 @@ describe('ProjectView daemon cleanup', () => {
       />,
     );
 
-    await waitFor(() => expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(2), {
-      timeout: 2_000,
-    });
-    expect(reattachDaemonRun.mock.calls.length).toBe(2);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    expect(reattachDaemonRun.mock.calls.length).toBe(2);
-    await waitFor(() => expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(3), {
-      timeout: 4_500,
-    });
-  }, 12_000);
+    await settleTestClock();
+    expect(reattachDaemonRun).toHaveBeenCalledTimes(2);
+
+    await advanceTestClock(2_999);
+    expect(reattachDaemonRun).toHaveBeenCalledTimes(2);
+    await advanceTestClock(1);
+    await settleTestClock();
+    expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(3);
+  });
 
   it.each([
     {
@@ -2609,19 +2701,19 @@ describe('ProjectView daemon cleanup', () => {
     );
 
     const sendProps = await waitForReadyChatPaneProps();
+    vi.useFakeTimers();
     await sendProps!.onSend!('flaky stream', [], []);
 
-    await waitFor(() => expect(streamViaDaemon).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(1), {
-      timeout: 2_000,
-    });
-    expect(reattachDaemonRun.mock.calls.length).toBe(1);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    expect(reattachDaemonRun.mock.calls.length).toBe(1);
-    await waitFor(() => expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(2), {
-      timeout: 4_500,
-    });
-  }, 12_000);
+    await settleTestClock();
+    expect(streamViaDaemon).toHaveBeenCalledTimes(1);
+    expect(reattachDaemonRun).toHaveBeenCalledTimes(1);
+
+    await advanceTestClock(2_999);
+    expect(reattachDaemonRun).toHaveBeenCalledTimes(1);
+    await advanceTestClock(1);
+    await settleTestClock();
+    expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
 
   it('keeps a partial live generic disconnect recoverable after the first failure', async () => {
     const runCreatedAt = Date.now();
@@ -2793,6 +2885,7 @@ describe('ProjectView daemon cleanup', () => {
   });
 
   it('keeps generic-disconnect cap retryable when the follow-up status probe returns null, but backs off before retrying', async () => {
+    vi.useFakeTimers();
     const runCreatedAt = Date.now();
     const genericDisconnect = await createGenericDisconnectError();
 
@@ -2873,16 +2966,15 @@ describe('ProjectView daemon cleanup', () => {
       />,
     );
 
-    await waitFor(() => expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(2), {
-      timeout: 2_000,
-    });
-    expect(reattachDaemonRun.mock.calls.length).toBe(2);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    expect(reattachDaemonRun.mock.calls.length).toBe(2);
-    await waitFor(() => expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(3), {
-      timeout: 4_500,
-    });
-  }, 12_000);
+    await settleTestClock();
+    expect(reattachDaemonRun).toHaveBeenCalledTimes(2);
+
+    await advanceTestClock(2_999);
+    expect(reattachDaemonRun).toHaveBeenCalledTimes(2);
+    await advanceTestClock(1);
+    await settleTestClock();
+    expect(reattachDaemonRun.mock.calls.length).toBeGreaterThanOrEqual(3);
+  });
 
   it('finalizes a reattach generic disconnect as succeeded when the next status poll turns terminal', async () => {
     const runCreatedAt = Date.now();
@@ -3754,6 +3846,7 @@ describe('ProjectView daemon cleanup', () => {
         'conv-1',
         'comment-1',
         'needs_review',
+        null,
       );
     });
   });
@@ -3922,7 +4015,7 @@ describe('ProjectView daemon cleanup', () => {
           call[2]?.runStatus === 'canceled' &&
           call[2]?.resumable === true &&
           call[2]?.events === preservedEvents &&
-          call[3] === undefined,
+          call[3]?.workspaceContext === null,
       );
       expect(canceledSave).toBeTruthy();
     });
@@ -4198,6 +4291,7 @@ describe('ProjectView daemon cleanup', () => {
       expect.objectContaining({
         artifactManifest: expect.objectContaining({ entry: 'theme.css' }),
       }),
+      null,
     );
   });
 
@@ -4296,6 +4390,7 @@ describe('ProjectView daemon cleanup', () => {
       expect.objectContaining({
         artifactManifest: expect.objectContaining({ entry: 'real-daemon-smoke.html' }),
       }),
+      null,
     );
     expect(saveTabs).not.toHaveBeenCalledWith('project-1', expect.objectContaining({ active: 'index.html' }));
   });

@@ -32,8 +32,34 @@ if (process.env.OD_SCOPES_STUB_FAIL === "1") {
   process.exit(1);
 }
 const files = process.env.OD_SCOPES_STUB_FILES ?? "";
-for (const line of files.split("\\n")) {
-  if (line.length > 0) console.log(line);
+const renameEachFromPrefix = process.env.OD_SCOPES_STUB_RENAME_EACH_FROM_PREFIX ?? "";
+const jqIndex = process.argv.indexOf("--jq");
+const jq = jqIndex >= 0 ? process.argv[jqIndex + 1] ?? "" : "";
+const previousFilename = process.env.OD_SCOPES_STUB_RENAMED_FROM ?? "";
+const fileLines = files.split("\\n").filter((line) => line.length > 0);
+if (jq.length === 0) {
+  console.log(JSON.stringify({
+    files: fileLines.map((filename, index) => ({
+      filename,
+      ...(renameEachFromPrefix.length > 0
+        ? { previous_filename: renameEachFromPrefix + index }
+        : previousFilename.length > 0
+          ? { previous_filename: previousFilename }
+          : {}),
+    })),
+  }));
+  process.exit(0);
+}
+let fileIndex = 0;
+for (const line of fileLines) {
+  console.log(line);
+  if (renameEachFromPrefix.length > 0 && jq.includes("previous_filename")) {
+    console.log(renameEachFromPrefix + fileIndex);
+  }
+  fileIndex += 1;
+}
+if (previousFilename.length > 0 && jq.includes("previous_filename")) {
+  console.log(previousFilename);
 }
 `;
 
@@ -270,6 +296,34 @@ const GOLDEN_CASES: readonly GoldenCase[] = [
     }),
   },
   {
+    name: "pull_request infra-cancel rerun surface arms e2e Vitest topology coverage",
+    context: PR,
+    files: [".github/scripts/rerun_infra_cancel.py"],
+    expected: expectedPlan({
+      ciMode: "hot",
+      scopes: [
+        "web_tests_required",
+        "ui_critical_validation_required",
+        "workspace_validation_required",
+      ],
+      runs: ["run_e2e_vitest", "run_playwright_critical", "run_web_workspace_tests"],
+    }),
+  },
+  {
+    name: "pull_request packaged-smoke topology test change runs e2e Vitest",
+    context: PR,
+    files: ["e2e/tests/packaged-smoke-workflow.test.ts"],
+    expected: expectedPlan({
+      ciMode: "hot",
+      scopes: [
+        "web_tests_required",
+        "ui_critical_validation_required",
+        "workspace_validation_required",
+      ],
+      runs: ["run_e2e_vitest", "run_playwright_critical", "run_web_workspace_tests"],
+    }),
+  },
+  {
     // Weird-but-current: a markdown file under skills/ triggers daemon+web tests
     // through the runtime-content prefix, while its .md extension exempts it from
     // arming the ui-critical fallback. workspace_validation is then re-derived
@@ -461,6 +515,31 @@ const GOLDEN_CASES: readonly GoldenCase[] = [
     }),
   },
   {
+    name: "merge_group daemon core keeps behavior coverage without unrelated consumers",
+    context: { eventName: "merge_group" },
+    files: [
+      "apps/daemon/src/server.ts",
+      "apps/daemon/src/routes/chat.ts",
+      "apps/daemon/tests/routes/chat.test.ts",
+    ],
+    expected: expectedPlan({
+      ciMode: "full",
+      scopes: [
+        "daemon_tests_required",
+        "ui_critical_validation_required",
+        "ui_p0_validation_required",
+        "workspace_validation_required",
+      ],
+      runs: ["run_e2e_vitest", "run_ui_p0"],
+    }),
+  },
+  {
+    name: "merge_group excluded daemon surfaces stay full",
+    context: { eventName: "merge_group" },
+    files: ["apps/daemon/src/sidecar/server.ts", "apps/daemon/src/runtimes/defs/claude.ts"],
+    expected: FULL_PLAN,
+  },
+  {
     name: "merge_group packaged configuration outside the certain core stays full",
     context: { eventName: "merge_group" },
     files: ["apps/desktop/package.json", "tools/pack/bin/tools-pack.mjs"],
@@ -499,12 +578,63 @@ test("merge_group compare result at GitHub's 300-file ceiling fails open to the 
   }
 });
 
+test("merge_group counts rename records rather than flattened paths at the 300-file ceiling", () => {
+  const files = Array.from({ length: 150 }, (_, index) => `docs/renamed-${index}.md`);
+  const run = runScopes("print", { eventName: "merge_group" }, files, {
+    OD_SCOPES_STUB_RENAME_EACH_FROM_PREFIX: "docs/original-",
+  });
+  try {
+    assertPlan(JSON.parse(run.stdout) as Record<string, unknown>, expectedPlan({ ciMode: "full" }));
+  } finally {
+    run.cleanup();
+  }
+});
+
 test("pull_request changed-file resolution failure still fails the run", () => {
   assert.throws(() => {
     const run = runScopes("print", PR, ["README.md"], { OD_SCOPES_STUB_FAIL: "1" });
     run.cleanup();
   });
 });
+
+for (const renameCase of [
+  { name: "pull_request", context: PR, filename: "e2e/tests/server-identifier-scope.test.ts", ciMode: "hot" },
+  {
+    name: "workflow_dispatch hot",
+    context: { eventName: "workflow_dispatch", ciMode: "hot" } as const,
+    filename: "e2e/tests/server-identifier-scope.test.ts",
+    ciMode: "hot",
+  },
+  {
+    name: "merge_group",
+    context: { eventName: "merge_group" } as const,
+    filename: "docs/server-identifier-scope.md",
+    ciMode: "full",
+  },
+] as const) {
+  test(`${renameCase.name} rename keeps validation scopes from the previous filename`, () => {
+    const run = runScopes("print", renameCase.context, [renameCase.filename], {
+      OD_SCOPES_STUB_RENAMED_FROM: "apps/daemon/tests/server-identifier-scope.test.ts",
+    });
+    try {
+      assertPlan(
+        JSON.parse(run.stdout) as Record<string, unknown>,
+        expectedPlan({
+          ciMode: renameCase.ciMode,
+          scopes: [
+            "daemon_tests_required",
+            "ui_critical_validation_required",
+            "ui_p0_validation_required",
+            "workspace_validation_required",
+          ],
+          runs: ["run_e2e_vitest", "run_ui_p0"],
+        }),
+      );
+    } finally {
+      run.cleanup();
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Unit layer: rule-table invariants and evaluator semantics, imported directly.
@@ -580,6 +710,47 @@ test("packaged-leaf core matches only its certain rule with the guarded effects"
       .map(([effect]) => effect),
     ["tools_dev_tests_required", "tools_pack_tests_required", "workspace_validation_required"],
   );
+});
+
+test("daemon core matches only its certain rule while excluded daemon surfaces stay medium", async () => {
+  const { evaluateScopeOutputs, matchesRuleMatch, scopeRules } = await import("../../../scripts/scopes.ts");
+  const files = [
+    "apps/daemon/src/server.ts",
+    "apps/daemon/src/policy.md",
+    "apps/daemon/tests/server.test.ts",
+  ];
+  for (const file of files) {
+    const matched = scopeRules.filter((rule) => matchesRuleMatch(file, rule.match)).map((rule) => rule.id);
+    assert.deepEqual(matched, ["certain-daemon-core"], file);
+  }
+
+  const evaluation = evaluateScopeOutputs(files, "certain", {
+    deriveWorkspaceValidationFromTestScopes: true,
+  });
+  assert.deepEqual(evaluation.decisions.map((decision) => decision.escalated), [false, false, false]);
+  assert.deepEqual(
+    Object.entries(evaluation.outputs)
+      .filter(([, enabled]) => enabled)
+      .map(([effect]) => effect),
+    [
+      "daemon_tests_required",
+      "ui_critical_validation_required",
+      "ui_p0_validation_required",
+      "workspace_validation_required",
+    ],
+  );
+
+  for (const file of [
+    "apps/daemon/src/sidecar/server.ts",
+    "apps/daemon/src/runtimes/defs/claude.ts",
+    "apps/daemon/tests/runtimes/agent-args.test.ts",
+  ]) {
+    const outside = evaluateScopeOutputs([file], "certain", {
+      deriveWorkspaceValidationFromTestScopes: true,
+    });
+    assert.equal(outside.decisions[0]?.escalated, true, file);
+    assert.equal(outside.decisions[0]?.matchedRules.includes("certain-daemon-core"), false, file);
+  }
 });
 
 test("packaged-leaf consumption collector resolves imports, packages, and static paths", async () => {
@@ -776,7 +947,7 @@ test("merge-queue threshold escalates medium-confidence files to the full radius
   });
 });
 
-test("runtime-definition changes produce only a three-domain UI P0 shadow candidate", async () => {
+test("runtime-definition changes produce only a four-domain UI P0 shadow candidate", async () => {
   const { evaluateUiP0Shadow } = await import("../../../scripts/scopes.ts");
   const decision = evaluateUiP0Shadow([
     "apps/daemon/src/runtimes/defs/atomcode.ts",
@@ -787,7 +958,7 @@ test("runtime-definition changes produce only a three-domain UI P0 shadow candid
   assert.equal(decision.capability, "daemon-runtime-definition");
   assert.deepEqual(
     decision.matrix.map((entry) => entry.name),
-    ["entry-settings", "project-workspace", "project-runtime"],
+    ["entry-settings", "project-workspace", "project-collab", "project-runtime"],
   );
   assert.deepEqual(decision.outsideCapabilityFiles, []);
 });
@@ -804,17 +975,25 @@ test("runtime-definition shadow fails closed for mixed, unknown, empty, and unre
     assert.equal(decision.mode, "full-fallback", files.join(", "));
     assert.deepEqual(
       decision.matrix.map((entry) => entry.name),
-      ["entry-settings", "project-workspace", "project-runtime", "workspace-restoration"],
+      [
+        "entry-settings",
+        "project-workspace",
+        "project-workspace-editor",
+        "project-collab",
+        "project-runtime",
+        "workspace-restoration",
+      ],
     );
   }
   assert.equal(evaluateUiP0Shadow([], false).reason, "files-unresolved");
 });
 
 test("UI P0 shadow guard pins full applied coverage and closed fallbacks", async () => {
-  const { uiP0ShadowContractErrors } = await import(
+  const { daemonCoreScopeContractErrors, uiP0ShadowContractErrors } = await import(
     "../../../scripts/lib/guard/scope.ts"
   );
   assert.deepEqual(uiP0ShadowContractErrors(), []);
+  assert.deepEqual(daemonCoreScopeContractErrors(), []);
 });
 
 test("plan command evaluates offline at the pr threshold", () => {
@@ -853,7 +1032,7 @@ test("plan trace reports the runtime-definition UI P0 shadow without changing th
   assert.equal(result.trace.uiP0Shadow.mode, "candidate");
   assert.deepEqual(
     result.trace.uiP0Shadow.matrix.map((entry) => entry.name),
-    ["entry-settings", "project-workspace", "project-runtime"],
+    ["entry-settings", "project-workspace", "project-collab", "project-runtime"],
   );
 });
 
